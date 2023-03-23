@@ -30,6 +30,7 @@ g.add((step,RDF.type,RDFS.Class))
 
 # User
 user = URIRef(uri+'User')
+g.add((user,RDF.type,RDFS.Class))
 g.add((user,RDF.type,person))
 
 # # Feedback

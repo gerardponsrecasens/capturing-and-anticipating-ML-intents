@@ -11,22 +11,25 @@ Script used to automatically run HyperOpt experiments for all the datasets
 stored in the folder /datasets. They are assumed to have the last column
 as the target, and that they contain only numeric attributes.
 '''
-meta_features = pd.read_csv(r'simple-meta-features.csv')
 
-from sklearn.metrics import f1_score
+
+# User inputs
+metric_name = 'Accuracy'  #Change 'metric_value' accordingly
+user = 'User10'
+input_path = r'./datasets/'
+output_path = r'./store/'
+meta_features = pd.read_csv(r'simple-meta-features.csv') #Used only to get the name of dataset in line 34. Not needed if one wants to store the name as idx
+
+# Custom loss functions
 
 def f1_loss(target, pred):
     return -f1_score(target, pred,average='weighted')
 
-metric_name = 'Accuracy'
-user = 'User10'
-
-
 if __name__ == "__main__":
-    datasets = os.listdir(r'./datasets/')
+    datasets = os.listdir(input_path)  
     for current_link in datasets:
         idx = current_link.split('.')[0]
-        dataframe = pd.read_csv(r'./datasets/'+current_link)
+        dataframe = pd.read_csv(input_path+current_link)
         dataframe = dataframe.dropna()
         name = meta_features[meta_features['row']==int(idx)].name
         ds = name.values[0]
@@ -58,7 +61,7 @@ if __name__ == "__main__":
         results = {'metric_name':metric_name,'metric_value':accuracy_score(y_pred,y_test),'pipeline':estim.best_model(),'dataset':ds,'user':user}
 
 
-        with open('./store/'+ds+'.pickle', 'wb') as handle:
+        with open(output_path+ds+'.pickle', 'wb') as handle:
             pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
         print(estim.score(X_test, y_test))

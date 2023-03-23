@@ -11,6 +11,10 @@ from rdflib.namespace import  RDF,RDFS
 Script to generate RDF triples from the HyperOpt results.
 '''
 
+input_path = r'./store/classification/'
+output_path = "classification.nt"
+
+
 g = Graph()
 
 
@@ -25,7 +29,7 @@ dmkb = "http://www.e-lico.eu/ontologies/dmo/DMOP/DMKB.owl#"
 ns_dmkb = rdflib.Namespace(dmkb)
 
 
-files = os.listdir(r'./store/classification/')
+files = os.listdir(input_path)
 
 
 for file in files:
@@ -127,4 +131,4 @@ for file in files:
         elif type(value)==bool:
             g.add((hyperinput,ns.hasValue,Literal(value, datatype=XSD.boolean)))
 
-g.serialize(format="nt",destination="classification.nt")
+g.serialize(format="nt",destination=output_path)

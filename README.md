@@ -15,4 +15,4 @@ To achieve it, different steps have been followed:
 ![workflow_22_03](https://user-images.githubusercontent.com/95172600/227177301-b1ebdca0-13df-4411-9576-739da2e3bef8.png)
 
 
-The repository is organized as follows: in the *Ontology* folder, the ontology .owl/.nt files can be found, alongside with the scripts used to generate them. Then, in the ontology *Population* folder the scripts for creating the instances from the different sources can be found. Finally, the *Reccomender* folder contains the scripts and demos for the recommender system.
+The repository is organized as follows: in the *Ontology* folder, the ontology .owl/.nt files can be found, alongside with the scripts used to generate them. Then, in the ontology *Population* folder the scripts for creating the instances from the different sources can be found. Finally, the *Recommender* folder contains the scripts and demos for the recommender system.
