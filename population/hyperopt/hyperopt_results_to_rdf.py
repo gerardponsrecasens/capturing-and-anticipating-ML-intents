@@ -33,7 +33,7 @@ files = os.listdir(input_path)
 
 
 for file in files:
-    with open('./store/classification/'+file, 'rb') as handle:
+    with open(input_path+file, 'rb') as handle:
         data = pickle.load(handle)
 
     user_name = data['user']
@@ -75,7 +75,7 @@ for file in files:
     modelEval = URIRef(uri+'ModelEval'+user_name+dataset_name+'-'+current_time)
     g.add((workflow,ns.hasOutput,modelEval))
     g.add((modelEval,ns.specifies,metric))
-    g.add((modelEval,ns.hasValue,Literal(data['value'], datatype=XSD.float)))
+    g.add((modelEval,ns.hasValue,Literal(data['metric_value'], datatype=XSD.float)))
 
 
     if data['pipeline']['preprocs'] != None:

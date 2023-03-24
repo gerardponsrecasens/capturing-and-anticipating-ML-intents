@@ -18,8 +18,8 @@ metric = 'Accuracy'
 datasets = [load_iris,load_digits,load_wine,load_breast_cancer]
 
 for dataset in datasets:
-    data = datasets()
-    ds = str(data).split(' ')[1][5:]
+    data = dataset()
+    ds = str(dataset).split(' ')[1][5:]
     X = data.data
     y = data.target
     test_size = int(0.3 * len(y))
