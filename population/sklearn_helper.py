@@ -142,8 +142,28 @@ for algorithm in preprocessers:
         g.add((onto_algorithm,RDF.type,ns_dmop.FeatureDiscretizationAlgorithm))
 
 
+## FEATURE SELECTION
+
+from sklearn import feature_selection as fs
+
+feature_selectors = [fs.GenericUnivariateSelect(),
+    fs.SelectFpr(),fs.SelectFwe(),fs.SelectKBest(),fs.SelectPercentile(),fs.VarianceThreshold()]
+
+for algorithm in feature_selectors:
+    name = str(algorithm).split('(')[0]
+    onto_algorithm = URIRef(dmkb+name)
+    g.add((onto_algorithm,RDF.type,ns_dmop.FeatureSelectionAlgorithm))
+    onto_imp = URIRef(uri+'sklearn-'+name)
+    g.add((onto_imp,ns.implements,onto_algorithm))
+    params = algorithm.get_params()
+    for param in params:
+        param_instance = URIRef(uri+'sklearn-'+name+'-'+param)
+        g.add((onto_imp,ns.hasHyperparameter,param_instance))
+
+
+
 ## EXTRA
-from sklearn.decomposition import PCA
+from sklearn.decomposition import PCA, FastICA
 PCA_imp = URIRef(uri+'sklearn-PCA')
 g.add((PCA_imp,ns.implements,ns_dmkb.PrincipalComponentAnalysis))
 clf = PCA()
@@ -151,6 +171,32 @@ params = clf.get_params()
 for param in params:
     param_instance = URIRef(uri+'sklearn-PCA-'+param)
     g.add((PCA_imp,ns.hasHyperparameter,param_instance))
+
+
+algorithm = FastICA()
+name = str(algorithm).split('(')[0]
+onto_algorithm = URIRef(dmkb+name)
+g.add((onto_algorithm,RDF.type,ns_dmop.ProjectiveFeatureExtractionAlgorithm))
+onto_imp = URIRef(uri+'sklearn-'+name)
+g.add((onto_imp,ns.implements,onto_algorithm))
+params = algorithm.get_params()
+for param in params:
+    param_instance = URIRef(uri+'sklearn-'+name+'-'+param)
+    g.add((onto_imp,ns.hasHyperparameter,param_instance))
+
+
+import xgboost as xgb
+
+algorithm = xgb.XGBClassifier()
+onto_algorithm = URIRef(dmkb+name)
+g.add((onto_algorithm,RDF.type,ns_dmop.ClassificationModelingAlgorithm))
+onto_imp = URIRef(uri+'sklearn-'+name)
+g.add((onto_imp,ns.implements,onto_algorithm))
+params = algorithm.get_params()
+for param in params:
+    param_instance = URIRef(uri+'sklearn-'+name+'-'+param)
+    g.add((onto_imp,ns.hasHyperparameter,param_instance))
+
 
 
 g.serialize(format="nt",destination="sklearn_helper.nt")
