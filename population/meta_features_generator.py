@@ -28,6 +28,7 @@ if classification:
     num_classes = int(data.iloc[:,-1:].nunique())
     majority = data.iloc[:,-1:].value_counts().max()
     minority = data.iloc[:,-1:].value_counts().min()
+    imbalancing = majority/num_instances
 
     numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
     numeric_features = sum([column in numerics for column in data.dtypes.values])
@@ -49,6 +50,7 @@ elif regression:
     num_classes = math.nan
     majority = math.nan
     minority = math.nan
+    imbalancing = math.nan
 
     numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
     numeric_features = sum([column in numerics for column in data.dtypes.values])
@@ -67,7 +69,7 @@ qualities = {'MajorityClassSize':majority,'MaxNominalAttDistinctValues':maxNomin
              'NumberOfClasses':num_classes,'NumberOfFeatures':num_features,'NumberOfInstances':num_instances,
              'NumberOfInstancesWithMissingValues':instances_with_missings,'NumberOfMissingValues':missing_values,
              'NumberOfNumericFeatures':numeric_features,'NumberOfSymbolicFeatures':categorical_features,
-             'PercentageOfInstancesWithMissingValues':percentageOfInstancesWithMissingValues}
+             'PercentageOfInstancesWithMissingValues':percentageOfInstancesWithMissingValues, 'Imbalancing': imbalancing}
 
 g = Graph()
 
