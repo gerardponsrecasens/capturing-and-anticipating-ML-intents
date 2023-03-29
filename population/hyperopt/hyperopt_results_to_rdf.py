@@ -55,6 +55,14 @@ for file in files:
     g.add((workflow,ns.hasInput,dataset))
     g.add((workflow,ns.achieves,task))
 
+    optimization_time = data.get('time', None)
+
+    if optimization_time:
+        opt_time = URIRef(uri+'Time'+user_name+dataset_name+'-'+current_time)
+        g.add((workflow,URIRef(dolce+'has-quality'),opt_time))
+        g.add((opt_time,RDF.type,ns_dmop.OptimizationTime))
+        g.add((opt_time,ns.hasValue,Literal(optimization_time, datatype=XSD.float)))
+
 
     ## USER INPUT 
 

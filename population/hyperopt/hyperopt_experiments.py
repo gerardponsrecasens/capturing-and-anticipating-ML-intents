@@ -4,6 +4,7 @@ import numpy as np
 import pickle
 import os
 import pandas as pd
+import time
 from sklearn.metrics import roc_auc_score, f1_score, accuracy_score, precision_score
 
 '''
@@ -67,11 +68,14 @@ if __name__ == "__main__":
                                     trial_timeout=150, verbose= False)
 
         # Search the hyperparameter space based on the data
+        start = time.time()
         estim.fit(X_train, y_train)
+        end = time.time()
 
         y_pred = estim.predict(X_test)
 
-        results = {'metric_name':metric_name,'metric_value':get_score(metric_name,y_pred,y_test),'pipeline':estim.best_model(),'dataset':ds,'user':user}
+        results = {'metric_name':metric_name,'metric_value':get_score(metric_name,y_pred,y_test),'pipeline':estim.best_model(),
+                   'dataset':ds,'user':user,'time':end-start}
 
 
         with open(output_path+ds+'.pickle', 'wb') as handle:
