@@ -42,7 +42,8 @@ for file in files:
 
 
 
-    # General Workflow
+    # GENERAL WORKFLOW
+
     user = URIRef(uri+user_name)
     workflow = URIRef(uri+'Worflow'+user_name+dataset_name+'-'+current_time)
     dataset = URIRef(uri+dataset_name)
@@ -54,8 +55,28 @@ for file in files:
     g.add((workflow,ns.hasInput,dataset))
     g.add((workflow,ns.achieves,task))
 
-    # Task: Requirements and Constraints
 
+    ## USER INPUT 
+
+    '''
+    In the future, the following two paragraphs should be instantiated previosly, with the creation of the ontology
+    '''
+
+    use = URIRef(uri+'Use')
+    no_use = URIRef(uri+'NoUse')
+    g.add((use,RDF.type,URIRef(uri+'Use-NoUse')))
+    g.add((no_use,RDF.type,URIRef(uri+'Use-NoUse')))
+
+    maximize = URIRef(uri+'Max')
+    minimize = URIRef(uri+'Min')
+    equal = URIRef(uri+'Equal')
+    g.add((maximize,RDF.type,URIRef(uri+'Min-Max-Equal')))
+    g.add((minimize,RDF.type,URIRef(uri+'Min-Max-Equal')))
+    g.add((equal,RDF.type,URIRef(uri+'Min-Max-Equal')))
+
+
+
+    # Task: Requirements 
     intent = URIRef(uri+'Predict')
     g.add((task,ns.hasIntent,intent))
 
@@ -63,11 +84,10 @@ for file in files:
     evalRequirement = URIRef(uri+'EvalRequirement'+user_name+dataset_name+'-'+current_time)
     traintestsplit = URIRef(uri+'TrainTestSplit')
     metric = URIRef(uri+data['metric_name'])
-    maximize = URIRef(uri+'Maximize')
+
     g.add((task,ns.hasRequirement,evalRequirement))
     g.add((evalRequirement,ns.withMethod,traintestsplit))
     g.add((evalRequirement,ns.onMetric,metric))
-    g.add((maximize,RDF.type,URIRef(uri+'Min-Max-Equal'))) ##############################
     g.add((evalRequirement,ns.howEval,maximize))
     # g.add((evalRequirement,ns.hasValue,Literal(80, datatype=XSD.integer)))
     # g.add((evalRequirement,ns.isSatisfied,Literal('true', datatype=XSD.boolean)))
@@ -77,6 +97,64 @@ for file in files:
     g.add((modelEval,ns.specifies,metric))
     g.add((modelEval,ns.hasValue,Literal(data['metric_value'], datatype=XSD.float)))
 
+
+    # Task: Constraints
+
+    algorithm_constraint = data.get('algorithm_constraint', None)
+
+    if algorithm_constraint:
+        const = URIRef(uri+user_name+dataset_name+'AlgorithmConstraint'+'-'+current_time)
+        g.add((task,ns.hasConstraint,const))
+        g.add((const,ns.isHard,Literal(True, datatype=XSD.boolean)))
+        g.add((const,ns.howConstraint,use))
+        g.add((const,ns.isSatisfied,Literal(True, datatype=XSD.boolean)))
+        g.add((const,ns.on,URIRef(uri+'sklearn-'+algorithm_constraint)))
+
+
+    hyp_constraint = data.get('hyperparam_constraints', None)
+    
+    if hyp_constraint:
+        for i,hycon in enumerate(hyp_constraint):
+            const = URIRef(uri+user_name+dataset_name+'HypConstraint'+str(i)+'-'+current_time)
+            g.add((task,ns.hasConstraint,const))
+            g.add((const,ns.isHard,Literal(True, datatype=XSD.boolean)))
+            g.add((const,ns.isSatisfied,Literal(True, datatype=XSD.boolean)))
+            g.add((const,ns.howConstraint,equal))
+            value = hyp_constraint[hycon]
+            if type(value)==int:
+                g.add((const,ns.hasValue,Literal(value, datatype=XSD.integer)))
+            elif type(value)==float:
+                g.add((const,ns.hasValue,Literal(value, datatype=XSD.float)))
+            elif type(value)==str:
+                g.add((const,ns.hasValue,Literal(value, datatype=XSD.string)))
+            elif type(value)==bool:
+                g.add((const,ns.hasValue,Literal(value, datatype=XSD.boolean)))
+
+            g.add((const,ns.on,URIRef(uri+'sklearn-'+algorithm_constraint+'-'+hycon)))
+
+
+    preprocessor_constraint = data.get('preprocessor_constraint', None)
+    not_use_pre = URIRef(uri+'NoPreprocessingConstraint')
+    g.add((not_use_pre,RDF.type,ns.SpecificConstraint))
+
+
+    if preprocessor_constraint:
+        const = URIRef(uri+user_name+dataset_name+'PreprocessorConstraint'+'-'+current_time)
+        g.add((task,ns.hasConstraint,const))
+        g.add((const,ns.isHard,Literal(True, datatype=XSD.boolean)))
+        g.add((const,ns.isSatisfied,Literal(True, datatype=XSD.boolean)))
+        if preprocessor_constraint != 'NoPre':
+            g.add((const,ns.howConstraint,use))
+            g.add((const,ns.on,URIRef(uri+'sklearn-'+algorithm_constraint)))
+        else: 
+            g.add((const,ns.on,not_use_pre))
+
+
+
+
+
+
+    ## PIPELINE AND STEPS
 
     if data['pipeline']['preprocs'] != None:
         model = URIRef(uri+'Model'+user_name+dataset_name+'-'+current_time)

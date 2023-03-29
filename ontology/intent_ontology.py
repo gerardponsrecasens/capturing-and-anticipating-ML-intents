@@ -4,7 +4,7 @@ from rdflib import Graph, URIRef, XSD
 from rdflib.namespace import  RDF,RDFS
 
 '''
-This script creates the Intent Ontology, linked to DMOP and Person, as of 23/03/2023
+This script creates the Intent Ontology, linked to DMOP and Person, as of 29/03/2023
 '''
 
 g = Graph()
@@ -100,6 +100,10 @@ g.add((UseNoUse,RDF.type,RDFS.Class))
 
 # Workflow Characteristic  (we add the particular workflo char. as a sublass of them: memory, speed...)
 genericWorkflowCharacteristic = ns_dmop.WorkflowCharacteristic
+
+#Specific Constraint
+speCon = URIRef(uri+'SpecificConstraint')
+g.add((speCon,RDF.type,RDFS.Class))
 
 
 ###### PROPERTIES ######
