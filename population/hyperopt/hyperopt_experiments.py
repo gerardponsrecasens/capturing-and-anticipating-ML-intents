@@ -4,7 +4,7 @@ import numpy as np
 import pickle
 import os
 import pandas as pd
-from sklearn.metrics import roc_auc_score, f1_score, accuracy_score
+from sklearn.metrics import roc_auc_score, f1_score, accuracy_score, precision_score
 
 '''
 Script used to automatically run HyperOpt experiments for all the datasets
@@ -14,7 +14,7 @@ as the target, and that they contain only numeric attributes.
 
 
 # User inputs
-metric_name = 'Accuracy'  #Change 'metric_value' accordingly
+metric_name = 'Accuracy'  # Choose between: Accuracy, F1, AUC and Precision
 user = 'User10'
 input_path = r'./datasets/'
 output_path = r'./store/'
@@ -24,6 +24,19 @@ meta_features = pd.read_csv(r'simple-meta-features.csv') #Used only to get the n
 
 def f1_loss(target, pred):
     return -f1_score(target, pred,average='weighted')
+
+# Scorer helper funciton
+
+def get_score(metric_name,y_pred,y_test):
+    if metric_name == 'Accuracy':
+        return accuracy_score(y_pred,y_test)
+    if metric_name == 'F1':
+        return f1_score(y_pred,y_test,average='weighted')
+    if metric_name == 'AUC':
+        return roc_auc_score(y_pred,y_test,average='weighted')
+    if metric_name == 'Precision':
+        return precision_score(y_pred,y_test,average='weighted')
+        
 
 if __name__ == "__main__":
     datasets = os.listdir(input_path)  
@@ -58,7 +71,7 @@ if __name__ == "__main__":
 
         y_pred = estim.predict(X_test)
 
-        results = {'metric_name':metric_name,'metric_value':accuracy_score(y_pred,y_test),'pipeline':estim.best_model(),'dataset':ds,'user':user}
+        results = {'metric_name':metric_name,'metric_value':get_score(metric_name,y_pred,y_test),'pipeline':estim.best_model(),'dataset':ds,'user':user}
 
 
         with open(output_path+ds+'.pickle', 'wb') as handle:

@@ -6,7 +6,7 @@ import pickle
 import os
 import pandas as pd
 import random
-from sklearn.metrics import roc_auc_score, f1_score, accuracy_score
+from sklearn.metrics import roc_auc_score, f1_score, accuracy_score, precision_score
 
 '''
 Script used to automatically run HyperOpt constraint experiments for all the datasets
@@ -52,6 +52,17 @@ def define_classifier(algorithm,args={}):
         return k_neighbors_classifier('my_knc',**args)
     else:
         return any_classifier("my_clf")
+
+
+def get_score(metric_name,y_pred,y_test):
+    if metric_name == 'Accuracy':
+        return accuracy_score(y_pred,y_test)
+    if metric_name == 'F1':
+        return f1_score(y_pred,y_test,average='weighted')
+    if metric_name == 'AUC':
+        return roc_auc_score(y_pred,y_test,average='weighted')
+    if metric_name == 'Precision':
+        return precision_score(y_pred,y_test,average='weighted')
     
 
 
@@ -116,7 +127,7 @@ if __name__ == "__main__":
 
         y_pred = estim.predict(X_test)
 
-        results = {'metric_name':metric_name,'metric_value':f1_score(y_pred,y_test,average='weighted'),
+        results = {'metric_name':metric_name,'metric_value':get_score(metric_name,y_pred,y_test),
                    'pipeline':estim.best_model(),'dataset':ds,'user':user,
                    'algorithm_constraint':algorithm,'hyperparam_constraints':constraint_args if len(constraint_args)!=0 else None,
                    'preprocessor_constraint':preprocessor}
