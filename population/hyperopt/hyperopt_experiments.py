@@ -15,8 +15,10 @@ as the target, and that they contain only numeric attributes.
 
 
 # User inputs
-metric_name = 'Accuracy'  # Choose between: Accuracy, F1, AUC and Precision
+metric_name = 'Accuracy'  # To choose between: Accuracy, F1, AUC and Precision
 user = 'User10'
+max_evals = 15
+max_time = 2250
 input_path = r'./datasets/'
 output_path = r'./store/'
 meta_features = pd.read_csv(r'simple-meta-features.csv') #Used only to get the name of dataset in line 34. Not needed if one wants to store the name as idx
@@ -25,6 +27,14 @@ meta_features = pd.read_csv(r'simple-meta-features.csv') #Used only to get the n
 
 def f1_loss(target, pred):
     return -f1_score(target, pred,average='weighted')
+def accuracy_loss(target,pred):
+    return -accuracy_score(target,pred)
+def auc_loss(target, pred):
+    return -roc_auc_score(target, pred,average='weighted')
+def precision_loss(target, pred):
+    return -precision_score(target, pred,average='weighted')
+
+scorer = {'Accuracy':accuracy_loss,'F1':f1_loss,'AUC':auc_loss,'Precision':precision_loss}
 
 # Scorer helper funciton
 
@@ -63,9 +73,9 @@ if __name__ == "__main__":
         estim = HyperoptEstimator(classifier=any_classifier("my_clf"),
                                     preprocessing=any_preprocessing("my_pre"),
                                     algo=tpe.suggest,
-                                    loss_fn=f1_loss,
-                                    max_evals=15,
-                                    trial_timeout=150, verbose= False)
+                                    loss_fn=scorer[metric_name],
+                                    max_evals=max_evals,
+                                    trial_timeout=int(max_time/max_evals), verbose= False)
 
         # Search the hyperparameter space based on the data
         start = time.time()
@@ -75,7 +85,7 @@ if __name__ == "__main__":
         y_pred = estim.predict(X_test)
 
         results = {'metric_name':metric_name,'metric_value':get_score(metric_name,y_pred,y_test),'pipeline':estim.best_model(),
-                   'dataset':ds,'user':user,'time':end-start}
+                   'dataset':ds,'user':user,'max_time':max_time,'time':end-start}
 
 
         with open(output_path+ds+'.pickle', 'wb') as handle:

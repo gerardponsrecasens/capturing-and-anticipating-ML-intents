@@ -11,8 +11,8 @@ from rdflib.namespace import  RDF,RDFS
 Script to generate RDF triples from the HyperOpt results.
 '''
 
-input_path = r'./store/classification/'
-output_path = "classification.nt"
+input_path = r'./store/'
+output_path = "RDFtriples.nt"
 
 
 g = Graph()
@@ -157,10 +157,15 @@ for file in files:
         else: 
             g.add((const,ns.on,not_use_pre))
 
-
-
-
-
+    max_time = data.get('max_time', None)
+    
+    if optimization_time and max_time:
+        const = URIRef(uri+user_name+dataset_name+'TimeConstraint'+'-'+current_time)
+        g.add((task,ns.hasConstraint,const))
+        g.add((const,ns.on,opt_time))
+        g.add((const,ns.isHard,Literal(True, datatype=XSD.boolean)))
+        g.add((const,ns.hasValue,Literal(max_time, datatype=XSD.boolean)))
+        
 
     ## PIPELINE AND STEPS
 
