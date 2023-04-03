@@ -153,7 +153,7 @@ for file in files:
         g.add((const,ns.isSatisfied,Literal(True, datatype=XSD.boolean)))
         if preprocessor_constraint != 'NoPre':
             g.add((const,ns.howConstraint,use))
-            g.add((const,ns.on,URIRef(uri+'sklearn-'+algorithm_constraint)))
+            g.add((const,ns.on,URIRef(uri+'sklearn-'+preprocessor_constraint)))
         else: 
             g.add((const,ns.on,not_use_pre))
 
@@ -169,7 +169,7 @@ for file in files:
 
     ## PIPELINE AND STEPS
 
-    if data['pipeline']['preprocs'] != None:
+    if len(data['pipeline']['preprocs']) != 0:
         model = URIRef(uri+'Model'+user_name+dataset_name+'-'+current_time)
         preproc = URIRef(uri+'Prepro'+user_name+dataset_name+'-'+current_time)
         g.add((workflow,ns.hasStep,model))
