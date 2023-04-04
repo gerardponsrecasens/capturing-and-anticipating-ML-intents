@@ -21,29 +21,32 @@ person = URIRef("https://schema.org/Person")
 
 ###### CLASSES ######
 # Workflow
-workflow = URIRef(uri+'Workflow')
-g.add((workflow,RDF.type,RDFS.Class))
+workflow = URIRef(dmop+'DM-Workflow')
+#g.add((workflow,RDF.type,RDFS.Class))
 
 # Step
 step = URIRef(uri+'Step')
-g.add((step,RDF.type,RDFS.Class))
+g.add((step,RDFS.subClassOf,URIRef(dmop+'DM-Operation')))
+#g.add((step,RDF.type,RDFS.Class))
 
 # User
 user = URIRef(uri+'User')
 g.add((user,RDF.type,RDFS.Class))
 g.add((user,RDF.type,person))
+g.add((user,RDFS.subClassOf,URIRef(dolce+'non-physical-endurant')))
 
 # # Feedback
 # feedback = URIRef(uri+'Feedback')
 # g.add((feedback,RDF.type,RDFS.Class))
 
 # Task
-task = URIRef(uri+'Task')
-g.add((task,RDF.type,RDFS.Class))
+task = URIRef(dmop+'DM-Task')
+#g.add((task,RDF.type,RDFS.Class))
 
 # Intent
 intent = URIRef(uri+'Intent')
 g.add((intent,RDF.type,RDFS.Class))
+g.add((intent,RDFS.subClassOf,URIRef(dolce+'non-physical-endurant')))
 
 # Dataset
 dataset = ns_dmop.DataSet
@@ -54,14 +57,17 @@ genericDatasetCharacteristic = ns_dmop.DataSetCharacteristic
 # Hyperparameter
 hyperparameter = URIRef(uri+'Hyperparameter')
 g.add((hyperparameter,RDF.type,RDFS.Class))
+g.add((hyperparameter,RDFS.subClassOf,URIRef(dolce+'non-physical-endurant')))
 
 # Hyperparameter Specification
 hyperparamspec = URIRef(uri+'HyperparamSpec')
 g.add((hyperparamspec,RDF.type,RDFS.Class))
+g.add((hyperparamspec,RDFS.subClassOf,URIRef(dolce+'non-physical-endurant')))
 
 # Implementation
 implementation = URIRef(uri+'Implementation')
-g.add((implementation,RDF.type,RDFS.Class))
+g.add((implementation,RDFS.subClassOf,URIRef(dmop+'DM-Operator')))
+#g.add((implementation,RDF.type,RDFS.Class))
 
 # Algorithm/Preprocess
 algoprepro = URIRef(dmop+'DM-Algorithm')
@@ -73,30 +79,37 @@ algoprepro = URIRef(dmop+'DM-Algorithm')
 # Model Evaluation
 modelEval = URIRef(uri+'ModelEvaluation')
 g.add((modelEval,RDF.type,RDFS.Class))
+g.add((modelEval,RDFS.subClassOf,URIRef(dolce+'non-physical-endurant')))
 
 # Evaluation Requirement
 evalReq = URIRef(uri+'EvaluationRequirement')
 g.add((evalReq,RDF.type,RDFS.Class))
+g.add((evalReq,RDFS.subClassOf,URIRef(dolce+'non-physical-endurant')))
 
 # Method
 method = URIRef(uri+'Method')
 g.add((method,RDF.type, RDFS.Class))
+g.add((method,RDFS.subClassOf,URIRef(dolce+'non-physical-endurant')))
 
 # Metric
 metric = URIRef(uri+'Metric')
 g.add((metric,RDF.type,RDFS.Class))
+g.add((metric,RDFS.subClassOf,URIRef(dolce+'non-physical-endurant')))
 
 # Constraint
 Constraint = URIRef(uri+'Constraint')
 g.add((Constraint,RDF.type,RDFS.Class))
+g.add((Constraint,RDFS.subClassOf,URIRef(dolce+'non-physical-endurant')))
 
 #Min-Max-Equal
 MinMaxEqual = URIRef(uri+'Min-Max-Equal')
 g.add((MinMaxEqual,RDF.type,RDFS.Class))
+g.add((MinMaxEqual,RDFS.subClassOf,URIRef(dmop+'DecisionStrategy'))) 
 
 # Use-NoUSe
 UseNoUse = URIRef(uri+'Use-NoUse')
 g.add((UseNoUse,RDF.type,RDFS.Class))
+g.add((UseNoUse,RDFS.subClassOf,URIRef(dmop+'DecisionStrategy')))
 
 # Workflow Characteristic  (we add the particular workflo char. as a sublass of them: memory, speed...)
 genericWorkflowCharacteristic = ns_dmop.WorkflowCharacteristic
@@ -104,6 +117,7 @@ genericWorkflowCharacteristic = ns_dmop.WorkflowCharacteristic
 #Specific Constraint
 speCon = URIRef(uri+'SpecificConstraint')
 g.add((speCon,RDF.type,RDFS.Class))
+g.add((speCon,RDFS.subClassOf,URIRef(dmop+'DecisionStrategy')))
 
 
 ###### PROPERTIES ######
@@ -272,9 +286,51 @@ g.add((satisfies,RDFS.domain,algoprepro))
 g.add((satisfies,RDFS.range,intent))
 
 
+
+
+### GENERAL INSTANTIATON
+
+use = URIRef(uri+'Use')
+no_use = URIRef(uri+'NoUse')
+g.add((use,RDF.type,UseNoUse))
+g.add((no_use,RDF.type,UseNoUse))
+
+maximize = URIRef(uri+'Max')
+minimize = URIRef(uri+'Min')
+equal = URIRef(uri+'Equal')
+g.add((maximize,RDF.type,MinMaxEqual))
+g.add((minimize,RDF.type,MinMaxEqual))
+g.add((equal,RDF.type,MinMaxEqual))
+
+
+precision = URIRef(uri+'Precision')
+accuracy = URIRef(uri + 'Accuracy')
+f1 = URIRef(uri+'F1')
+AUC = URIRef(uri+'AUC')
+R2 = URIRef(uri+'R2')
+recall = URIRef(uri+'Recall')
+g.add((precision,RDF.type,metric))
+g.add((accuracy,RDF.type,metric))
+g.add((f1,RDF.type,metric))
+g.add((AUC,RDF.type,metric))
+g.add((R2,RDF.type,metric))
+g.add((recall,RDF.type,metric))
+
+
+trainTestSplit = URIRef(uri+'TrainTestSplit')
+CV = URIRef(uri+'CV')
+foldCV5 = URIRef(uri+'5foldCV')
+foldCV10 = URIRef(uri+'10foldCV')
+g.add((recall,RDF.type,method))
+g.add((CV,RDF.type,method))
+g.add((foldCV5,RDF.type,method))
+g.add((foldCV10,RDF.type,method))
+
+
+
 #### SERIALIZE 
 
-g.serialize(format="nt",destination="intent_ontology_dmop.nt")
+g.serialize(format="nt",destination="intent_ontology.nt")
 
 
 
