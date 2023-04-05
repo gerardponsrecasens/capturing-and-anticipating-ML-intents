@@ -327,6 +327,21 @@ g.add((foldCV5,RDF.type,method))
 g.add((foldCV10,RDF.type,method))
 
 
+predict = URIRef(uri+'Predict')
+describe = URIRef(uri+'Describe')
+explain = URIRef(uri+'Explain')
+classification = URIRef(uri+'Classification')
+regression = URIRef(uri+'Regression')
+clustering = URIRef(uri+'Clustering')
+g.add((predict,RDF.type,intent))
+g.add((describe,RDF.type,intent))
+g.add((explain,RDF.type,intent))
+g.add((classification,RDF.type,intent))
+g.add((regression,RDF.type,intent))
+g.add((clustering,RDF.type,intent))
+
+
+
 
 #### SERIALIZE 
 
