@@ -3,5 +3,19 @@
 {% block title %}Output{% endblock %} 
 
 {% block content%}
-<h1>Output Goes Here</h1>
+<h1>RESULTS</h1>
+Your score is of {{data}}
+
+<form method="POST">
+    {{form.hidden_tag()}}
+
+    {{form.rating.label(class='form-label')}}
+    {{form.rating(class='form-control')}}
+    <br/>
+    {{form.feedback.label(class='form-label')}}
+    {{form.feedback(class='form-control')}}
+    <br/>
+    {{form.submit(class='btn btn-primary')}}
+
+  </form>
 {% endblock %}
