@@ -75,7 +75,7 @@ def generate(user_input):
     user = user_input['User']
     max_evals = 5
     max_time = user_input['Time']
-    input_path = r'./app/static/datasets/iris.csv'
+    input_path = r'./app/static/datasets/'+user_input['Dataset']+'.csv'
 
 
     # Define Constraint Space (Classifiers (w/ hyperparameters) and Preprocessors)
@@ -91,7 +91,7 @@ def generate(user_input):
    
     dataframe = pd.read_csv(input_path)
     dataframe = dataframe.dropna()
-    ds = 'iris'
+    ds = user_input['Dataset']
     data = dataframe.values
     X, y = data[:, :-1], data[:, -1]
     y = y.astype('int32')

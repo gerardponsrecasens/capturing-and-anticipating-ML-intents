@@ -78,7 +78,7 @@ def feedback_screen():
                                form = feedback,data = session['score'])
     
     elif request.method == 'POST':
-        print(feedback.rating)
+        print(feedback.rating.data,feedback.feedback.data)
         return redirect(url_for('views.home'))
 
 

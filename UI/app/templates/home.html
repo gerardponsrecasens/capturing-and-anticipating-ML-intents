@@ -4,32 +4,49 @@
 
 {% block content%}
   <h1>User Input</h1>
+  <br/>
     <form method="POST">
-      {{form.hidden_tag()}}
-  
       {{form.name.label(class='form-label')}}
       {{form.name(class='form-control')}}
       <br/>
-      {{form.dataset.label(class='form-label')}}
-      {{form.dataset(class='form-control')}}
-      <!-- {{form.dataset(class='form-control-file')}} -->
       <br/>
-      {{form.intent.label(class='form-label')}}
-      {{form.intent(class='form-control')}}
+      <div class="row">
+        <div class="col-md-6">
+          {{form.dataset.label(class='form-label')}}
+          {{form.dataset(class='form-control')}}
+          <br/>
+          {{form.metric.label(class='form-label')}}
+          {{form.metric(class='form-control')}}
+          <br/>
+          {{form.prepro.label(class='form-check-label')}}
+          <br/>
+          {{form.prepro(class='form-check-input')}}
+
+        </div>
+        <div class="col-md-6">
+          {{form.intent.label(class='form-label')}}
+          {{form.intent(class='form-control')}}
+          <br/>
+          {{form.time.label(class='form-label')}}
+          {{form.time(class='form-control')}}
+          <br/>
+          {{form.algorithm.label(class='form-label')}}
+          {{form.algorithm(class='form-control')}}  
+        </div>
+      </div>
       <br/>
-      {{form.metric.label(class='form-label')}}
-      {{form.metric(class='form-control')}}
       <br/>
-      {{form.time.label(class='form-label')}}
-      {{form.time(class='form-control')}}
-      <br/>
-      {{form.prepro.label(class='form-label')}}
-      {{form.prepro(class='form-control')}}
-      <br/>
-      {{form.algorithm.label(class='form-label')}}
-      {{form.algorithm(class='form-control')}}
-      <br/>
-      {{form.submit(class='btn btn-primary')}}
+      {{ form.submit(class='btn btn-primary') }}
+
+      <!-- Styles to change default settings -->
+
+      <style>
+        .form-check-input[type=checkbox] {
+          width: 30px;
+          height: 30px;
+        }
+        </style>
+
 
     </form>
 {% endblock %}
