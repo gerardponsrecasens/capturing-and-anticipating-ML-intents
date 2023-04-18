@@ -99,16 +99,11 @@ if train:
 
 else:
     model = TransEModel(2,2652,25, dissimilarity_type='L2')
-    model.load_state_dict(torch.load('model.pt'))
+    model.load_state_dict(torch.load('model_2d.pt'))
 
 
 emb = model.get_embeddings()
 
-
-# print(emb[0][kg_train.ent2ix['http://localhost/8080/intentOntology#diabetes']])
-# print(emb[0][kg_train.ent2ix['http://localhost/8080/intentOntology#sklearn-RandomForestClassifier']])
-# print(emb[0][kg_train.ent2ix['http://localhost/8080/intentOntology#sklearn-SVC']])
-# print(emb[0][kg_train.ent2ix['http://localhost/8080/intentOntology#sklearn-LogisticRegression']])
 
 
 if plot:
@@ -148,19 +143,24 @@ if predict:
     relation_idx = kg_train.rel2ix['http://localhost/8080/intentOntology#on']
 
     tail_idx = kg_train.ent2ix['http://localhost/8080/intentOntology#sklearn-SVC']
-    score = predict_triple_score(emb, head_idx, relation_idx, tail_idx)
-    print(f"Score for SVC: {score}")
+    score = model.scoring_function(torch.tensor([head_idx]),torch.tensor([tail_idx]),torch.tensor([relation_idx]))    
+    print(f"Score for SVC: {score.item()}")
+
 
     tail_idx = kg_train.ent2ix['http://localhost/8080/intentOntology#sklearn-RandomForestClassifier']
-    score = predict_triple_score(emb, head_idx, relation_idx, tail_idx)
-    print(f"Score for RF: {score}")
+    score = model.scoring_function(torch.tensor([head_idx]),torch.tensor([tail_idx]),torch.tensor([relation_idx]))    
+    print(f"Score for RF: {score.item()}")
+
+
 
     tail_idx = kg_train.ent2ix['http://localhost/8080/intentOntology#sklearn-LogisticRegression']
-    score = predict_triple_score(emb, head_idx, relation_idx, tail_idx)
-    print(f"Score for LR: {score}")
+    score = model.scoring_function(torch.tensor([head_idx]),torch.tensor([tail_idx]),torch.tensor([relation_idx]))
+    print(f"Score for LR: {score.item()}")
 
     tail_idx = kg_train.ent2ix['http://localhost/8080/intentOntology#sklearn-KNeighborsClassifier']
-    score = predict_triple_score(emb, head_idx, relation_idx, tail_idx)
-    print(f"Score for KNN: {score}")
+    score = model.scoring_function(torch.tensor([head_idx]),torch.tensor([tail_idx]),torch.tensor([relation_idx]))
+    print(f"Score for KNN: {score.item()}")
+
+
 
 
