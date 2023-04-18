@@ -8,7 +8,6 @@ import os
 import pandas as pd
 import random
 import time
-import multiprocessing
 
 
 '''
@@ -76,6 +75,7 @@ def generate(user_input):
     max_evals = 5
     max_time = user_input['Time']
     input_path = r'./app/static/datasets/'+user_input['Dataset']+'.csv'
+    output_path = r'./app/static/model/'
 
 
     # Define Constraint Space (Classifiers (w/ hyperparameters) and Preprocessors)
@@ -146,8 +146,8 @@ def generate(user_input):
             'preprocessor_constraint':preprocessor,'max_time':max_time,'time':end-start}
 
 
-    # with open(output_path+ds+'.pickle', 'wb') as handle:
-    #     pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    with open(output_path+'model.pickle', 'wb') as handle:
+        pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     return(np.round(estim.score(X_test, y_test),2))
 

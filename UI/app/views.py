@@ -1,8 +1,9 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField,SelectField,FileField,DecimalField,BooleanField,TextAreaField
+from wtforms import StringField, SubmitField,SelectField,FileField,DecimalField,BooleanField,TextAreaField,RadioField
 from wtforms.validators import DataRequired, NumberRange
 from .generate_pipeline import generate
+from .generate_triples import generate_triples
 
 
 # Create Form Class for the User Input
@@ -27,11 +28,11 @@ class inputForm(FlaskForm):
 # Create Form Class for the User Ratings
 
 class ratingForm(FlaskForm):
-    my_ratings = [(1, 1), (2, 2),(3, 3),(4, 4),(5, 5)]
-    rating = SelectField('How would you rate this Workflow?',choices=my_ratings,render_kw={'style': 'width: 30ch'})
+    #my_ratings = [(1, 1), (2, 2),(3, 3),(4, 4),(5, 5)]
+    #rating = SelectField('How would you rate this Workflow?',choices=my_ratings,render_kw={'style': 'width: 30ch'})
+    rating = RadioField('How would you rate this Workflow?', choices=[('1', '1'), ('2', '2'), ('3', '3'), ('4', '4'), ('5', '5')], default='3')
     feedback = TextAreaField('Leave any comments you may have')
     submit = SubmitField('Submit')
-
 
 
 views = Blueprint('views', __name__)
@@ -64,10 +65,7 @@ def home():
 '''
 Feedback view. The user gets shown the results of the generated pipelines, and he/she can leave a review,
 in terms of rating and of a comment. Upon submission, it gets redirected to the main screen, where he/she
-can launch another query.
-
-TO DO: On the background, the system should annotate the whole process in RDF triples, complying with the 
-status.
+can launch another query Before that, the generated workflow gets annotated.
 '''
 
 @views.route('/feedback_screen', methods=['GET', 'POST'])
@@ -79,6 +77,8 @@ def feedback_screen():
     
     elif request.method == 'POST':
         print(feedback.rating.data,feedback.feedback.data)
+        generate_triples([feedback.rating.data,feedback.feedback.data]) #TO DO: incorporate COMMENT in feedback
+
         return redirect(url_for('views.home'))
 
 
