@@ -4,6 +4,8 @@
 
 {% block content%}
 
+<!-- This style creates the numbers 1 2 3 4 5 for the user rating-->
+
 <style>
   .rating {
       display: flex;
@@ -33,7 +35,7 @@
 
 <h1>RESULTS</h1>
 <br/>
-Your score is of <b>{{data}}</b>.
+Your score is of <b>{{data}}</b>. 
 <br/>
 <br/>
 <form method="POST">
@@ -45,8 +47,6 @@ Your score is of <b>{{data}}</b>.
           <label for="{{ choice.id }}" class="radio-inline">{{ choice.label }}</label>
       {% endfor %}
   </div>
-    <!-- {{form.rating.label(class='form-label')}}
-    {{form.rating(class='form-control')}} -->
     <br/>
     {{form.feedback.label(class='form-label')}}
     {{form.feedback(class='form-control')}}
