@@ -17,35 +17,27 @@ from tqdm.autonotebook import tqdm
 
 import matplotlib.pyplot as plt
 
-
-def predict_triple_score(emb, head_idx, relation_idx, tail_idx):
-
-    head_emb = emb[0][head_idx]
-    relation_emb = emb[0][relation_idx]
-    tail_emb = emb[0][tail_idx]
-    score = -LA.norm(head_emb + relation_emb - tail_emb) #The closer to 0 the better
-    
-    return score
-
 train = False
+fine_tune = False
 plot = False
 predict = True
 
+# Load the already stored graph. If we are predicting/fine-tuning, we only need the 
+# entity_name_to_idx and relation_name_to_idx. To be stored in triples in the future.
+
 g = Graph()
 g.parse("constraintRDF.nt", format="nt")
-
-
 triples = []
-
 for s, p, o in g:
     if p not in (OWL.sameAs, OWL.inverseOf):
         triples.append((str(s), str(p), str(o)))
         
 data = pd.DataFrame(triples)
 data.columns = ['from','rel','to']
-torchKGData = KnowledgeGraph(df=data)
-# Load dataset
-kg_train = torchKGData
+data = data[['from','to','rel']]
+kg_train = KnowledgeGraph(df=data)
+entity_name_to_idx = kg_train.ent2ix.copy()
+relation_name_to_idx = kg_train.rel2ix.copy()
 
 if train:
 
@@ -69,7 +61,9 @@ if train:
     # Define the torch optimizer to be used
     optimizer = Adam(model.parameters(), lr=lr, weight_decay=1e-5)
 
+    # Define how negative samples are going to be genereated
     sampler = BernoulliNegativeSampler(kg_train)
+
     dataloader = DataLoader(kg_train, batch_size=b_size, use_cuda='all')
 
     iterator = tqdm(range(n_epochs), unit='epoch')
@@ -94,19 +88,115 @@ if train:
 
     model.normalize_parameters()
 
-    print(emb_dim, kg_train.n_ent, kg_train.n_rel)
-    torch.save(model.state_dict(), 'model.pt')
+    # Save the model state dict and configuration parameters
+    torch.save([model.emb_dim,model.n_ent,model.n_rel, model.state_dict()],'model_all.pt')
+
 
 else:
-    model = TransEModel(2,2652,25, dissimilarity_type='L2')
-    model.load_state_dict(torch.load('model_2d.pt'))
+    # Load stored model
+    e,n,r,state= torch.load('model_all.pt')
+    model = TransEModel(e,n,r)
+    model.load_state_dict(state)
 
 
-emb = model.get_embeddings()
 
+
+if fine_tune:
+
+    # Load the new data to be included
+    g_n = Graph()
+    g_n.parse("additional.nt", format="nt")
+
+    new_triples = []
+
+    for s, p, o in g_n:
+        if p not in (OWL.sameAs, OWL.inverseOf):
+            new_triples.append((str(s), str(p), str(o)))
+            
+    new_data = pd.DataFrame(new_triples)
+    new_data.columns = ['from','rel','to']
+
+    # Add the new entities and relations to the dictionaries
+    for h, r, t in new_triples:
+        if h not in entity_name_to_idx:
+            entity_name_to_idx[h] = len(entity_name_to_idx)
+        if r not in relation_name_to_idx:
+            relation_name_to_idx[r] = len(relation_name_to_idx)
+        if t not in entity_name_to_idx:
+            entity_name_to_idx[t] = len(entity_name_to_idx)
+
+    # Create the KnowledgeGraph object
+    kg_fine = KnowledgeGraph(df=new_data,ent2ix=entity_name_to_idx,rel2ix=relation_name_to_idx)
+    
+
+    # Update the entity and relation embeddings in the model. For the new entities intialize the 
+    # weights at random.
+    num_new_entities = len(entity_name_to_idx) - model.n_ent
+    num_new_relations = len(relation_name_to_idx) - model.n_rel
+
+    if num_new_entities > 0:
+        new_ent_emb = torch.randn(num_new_entities, model.emb_dim)
+        updated_ent_emb = torch.nn.Parameter(torch.cat([model.ent_emb.weight, new_ent_emb], dim=0))
+        model.n_ent += num_new_entities
+
+    # if num_new_relations > 0:
+    #     new_rel_emb = torch.randn(num_new_relations, model.emb_dim)
+    #     updated_rel_emb = torch.nn.Parameter(torch.cat([model.rel_emb.weight, new_rel_emb], dim=0))
+    #     model.n_rel += num_new_relations
+
+    
+    # Create a new model with the complete weights and the appropriate size
+    state_dict = model.state_dict()
+    state_dict['ent_emb.weight'] = updated_ent_emb
+    model = TransEModel(model.emb_dim,model.n_ent, model.n_rel)
+    model.load_state_dict(state_dict)
+
+    emb_1 = model.get_embeddings()
+
+    # Define the loss function
+    criterion = MarginLoss(margin=0.5)
+
+    # Set up the optimizer with a smaller learning rate
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
+
+    # Create a DataLoader for the training set
+    new_dataloader = DataLoader(kg_fine, batch_size=32, use_cuda=False)
+    sampler = BernoulliNegativeSampler(kg_fine)
+
+    # Fine-tune the model with a limited number of training epochs
+    n_epochs = 100
+    iterator = tqdm(range(n_epochs), unit='epoch')
+
+
+    for epoch in iterator:
+        running_loss = 0.0
+        for i, batch in enumerate(new_dataloader):
+            h, t, r = batch[0], batch[1], batch[2]
+            n_h, n_t = sampler.corrupt_batch(h, t, r)
+
+            optimizer.zero_grad()
+
+            # forward + backward + optimize
+            pos, neg = model(h, t, r, n_h, n_t)
+            loss = criterion(pos, neg)
+            loss.backward()
+            optimizer.step()
+
+            running_loss += loss.item()
+        iterator.set_description(
+            'Epoch {} | mean loss: {:.5f}'.format(epoch + 1,
+                                                running_loss / len(new_dataloader)))
+        
+
+    results = [torch.equal(a,b) for a,b in zip(emb[0],emb_1[0])]
+
+    # Save the model state dict and configuration parameters
+    torch.save([model.emb_dim,model.n_ent,model.n_rel, model.state_dict()],'model_fine.pt')
 
 
 if plot:
+    emb = model.get_embeddings()
+
     diabetes = emb[0][kg_train.ent2ix['http://localhost/8080/intentOntology#diabetes']]
     lymph = emb[0][kg_train.ent2ix['http://localhost/8080/intentOntology#lymph']]
     credit = emb[0][kg_train.ent2ix['http://localhost/8080/intentOntology#credit-approval']]
