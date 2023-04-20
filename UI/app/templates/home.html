@@ -1,11 +1,21 @@
-{% extends "base.html" %} 
+{% extends "base.html" %}
 
-{% block title %}User Input{% endblock %} 
+{% block title %}User Input{% endblock %}
 
 {% block content%}
-  <h1>User Input</h1>
-  <br/>
-    <form method="POST">
+  <!-- HTML for the loading icon and overlay -->
+  <div id="loading-overlay" style="display: none;">
+    <div class="d-flex justify-content-center align-items-center" style="height: 100%;">
+      <div class="custom-spinner"></div>
+      <span class="loading-text">Generating Workflow...</span>
+    </div>
+  </div>
+
+  <div id="content-wrapper">
+
+    <h1>User Input</h1>
+    <br/>
+    <form method="POST" id="my-form">
       {{form.name.label(class='form-label')}}
       {{form.name(class='form-control')}}
       <br/>
@@ -20,7 +30,11 @@
           <br/>
           {{form.prepro.label(class='form-check-label')}}
           <br/>
-          {{form.prepro(class='form-check-input')}}
+          {{form.prepro(class='form-check-input', id='prepro-checkbox')}}
+          <br/>
+          <br/>
+          {{form.algorithm.label(class='form-label')}}
+          {{form.algorithm(class='form-control')}}
 
         </div>
         <div class="col-md-6">
@@ -30,23 +44,140 @@
           {{form.time.label(class='form-label')}}
           {{form.time(class='form-control')}}
           <br/>
-          {{form.algorithm.label(class='form-label')}}
-          {{form.algorithm(class='form-control')}}  
+          {{form.preprocessor.label(class='form-label')}}
+          {{form.preprocessor(class='form-control', id='preprocessor-dropdown', disabled=form.prepro.data == False)}}
         </div>
       </div>
       <br/>
       <br/>
-      {{ form.submit(class='btn btn-primary') }}
-
-      <!-- Styles to change default settings of the checkbox-->
-
-      <style>
-        .form-check-input[type=checkbox] {
-          width: 30px;
-          height: 30px;
-        }
-        </style>
-
-
+      {{ form.submit(class='btn btn-primary', id='my-button', onclick="showLoading()") }}
     </form>
+  </div>
+
+  <!-- CSS for the custom loading icon animation and overlay -->
+  <style>
+    .custom-spinner {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      border: 0.5rem solid #ccc;
+      border-top-color: #007bff;
+      animation: custom-spinner-animation 1s linear infinite;
+    }
+
+    @keyframes custom-spinner-animation {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      position: relative;
+      left: -1.25rem;
+      font-weight: bold;
+      color: #000000;
+    }
+
+    .loading-text::after {
+      content: attr(data-content);
+      position: relative;
+      display: inline-block;
+      margin-left: 0.5rem;
+    }
+
+    .loading-text .visually-hidden {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      border: 0;
+      clip: rect(0 0 0 0);
+      overflow: hidden;
+    }
+
+    /* CSS to center the loading icon and overlay */
+    #loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 9999;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    #loading-overlay .d-flex {
+      height: 100%;
+      justify-content: center;
+      align-items: center;}
+
+#content-wrapper {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+</style>
+
+<!-- Styles to change default settings of the checkbox-->
+
+<style>
+  .form-check-input[type=checkbox] {
+    width: 30px;
+    height: 30px;
+  }
+</style>
+
+      
+<!-- Script to show the loading icon and overlay once the submit button is activated -->
+<!-- <script>
+  function showLoading() {
+    $('#loading-overlay').show();
+    $('#loading-icon').show();
+    $('#my-form').submit();
+  }
+</script> -->
+
+<script>
+  function showLoading() {
+    if (document.getElementById("my-form").checkValidity()) {
+      // show the loading icon and overlay
+      $('#loading-overlay').show();
+      $('#loading-icon').show();
+    }
+  }
+</script>
+
+<!-- Script to gray out the Preprocessing algorithm selector if the user requests not to use Preprocessors. -->
+<script>
+  const preproCheckbox = document.getElementById('prepro-checkbox');
+  const preprocessorDropdown = document.getElementById('preprocessor-dropdown');
+
+  preproCheckbox.addEventListener('change', function() {
+    if (preproCheckbox.checked) {
+      preprocessorDropdown.disabled = false;
+    } else {
+      preprocessorDropdown.disabled = true;
+    }
+  });
+</script>
+
+
+<!-- The loading item only shows up if it is validated. -->
+
+<script>
+  // add a submit event listener to the form
+  document.getElementById("my-form").addEventListener("submit", function(event) {
+    // check if the form is invalid
+    if (!this.checkValidity()) {
+      event.preventDefault(); // prevent default form submission
+      event.stopPropagation(); // stop event bubbling
+    }
+    this.classList.add("was-validated"); // add "was-validated" class to enable validation styles
+  }, false);
+</script>
+
+
 {% endblock %}

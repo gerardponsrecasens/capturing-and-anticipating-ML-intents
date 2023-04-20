@@ -1,0 +1,41 @@
+{% extends "base.html" %} 
+
+{% block title %}User Input{% endblock %} 
+
+{% block content%}
+  <h1>User Input</h1>
+  <br/>
+    <form method="POST">
+      {{form.name.label(class='form-label')}}
+      {{form.name(class='form-control')}}
+      <br/>
+      <br/>
+      <div class="row">
+        <div class="col-md-6">
+          {{form.dataset.label(class='form-label')}}
+          {{form.dataset(class='form-control')}}
+          <br/>
+
+        </div>
+        <div class="col-md-6">
+          {{form.intent.label(class='form-label')}}
+          {{form.intent(class='form-control')}}
+          <br/>  
+        </div>
+      </div>
+      <br/>
+      <br/>
+      {{ form.submit(class='btn btn-primary') }}
+
+      <!-- Styles to change default settings of the checkbox-->
+
+      <style>
+        .form-check-input[type=checkbox] {
+          width: 30px;
+          height: 30px;
+        }
+        </style>
+
+
+    </form>
+{% endblock %}

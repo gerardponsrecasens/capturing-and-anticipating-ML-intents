@@ -67,7 +67,7 @@ def get_score(metric_name,y_pred,y_test):
     if metric_name == 'Precision':
         return precision_score(y_pred,y_test,average='weighted')
 
-def generate(user_input):
+def pipeline_generator(user_input):
 
     # User inputs
     metric_name = user_input['Metric']
@@ -75,7 +75,7 @@ def generate(user_input):
     max_evals = 5
     max_time = user_input['Time']
     input_path = r'./app/static/datasets/'+user_input['Dataset']+'.csv'
-    output_path = r'./app/static/model/'
+    output_path = r'./app/static/workflow/'
 
 
     # Define Constraint Space (Classifiers (w/ hyperparameters) and Preprocessors)
@@ -83,9 +83,11 @@ def generate(user_input):
     different_classifiers = {'SVC':{'C':[0.01,0.1,1,10],'kernel':['linear','poly','rbf']},
                             'RandomForestClassifier':{'n_estimators':[100,150,200],'max_depth':[2,3,4,5,6,7],'criterion':['gini','entropy']},
                             'LogisticRegression':{'penalty':['l1','l2'],'C':[0.01,0.1,1,10]},
-                            'KNeighborsClassifier':{'n_neighbors':[3,5,7],'weights':['uniform','distance']}}
+                            'KNeighborsClassifier':{'n_neighbors':[3,5,7],'weights':['uniform','distance']},
+                            'Any':{}}
 
-    different_preprocessors = {'NoPre':[],'StandardScaler':[standard_scaler('my_pre')],'MinMaxScaler':[min_max_scaler('my_pre')],'Normalizer':[normalizer('my_pre')]} 
+    different_preprocessors = {'NoPre':[],'StandardScaler':[standard_scaler('my_pre')],'MinMaxScaler':[min_max_scaler('my_pre')],
+                               'Normalizer':[normalizer('my_pre')],'Any':any_preprocessing("my_pre")} 
 
 
    
@@ -117,8 +119,7 @@ def generate(user_input):
 
     
     if user_input['Preprocessing']:
-
-        preprocessor = random.choice(list(different_preprocessors.keys()))
+        preprocessor = user_input['PreproAlgorithm']
 
     else:
         preprocessor = 'NoPre'
