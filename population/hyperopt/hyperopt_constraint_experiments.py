@@ -19,7 +19,6 @@ classification algorithms, their hyperparameters and the preprocessing
 
 # User inputs
 
-metric_name = 'F1'  # To choose between: Accuracy, F1, AUC and Precision
 user = 'User10'
 max_evals = 15
 max_time = 2250
@@ -92,6 +91,8 @@ if __name__ == "__main__":
 
 
     for current_link in datasets:
+
+        metric_name = random.choice(['F1','AUC','Precision','Accuracy'])
 
         idx = current_link.split('.')[0]
         dataframe = pd.read_csv(input_path+current_link)
