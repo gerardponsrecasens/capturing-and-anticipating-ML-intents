@@ -35,10 +35,12 @@ class inputForm(FlaskForm):
     time = DecimalField('Time limit (in seconds)',validators=[DataRequired(),NumberRange(0,3600)],render_kw={'style': 'width: 30ch'})
     prepro = BooleanField('Is Preprocessing needed?',render_kw={'style': 'width: 30ch'})
     my_preprocessors = [('StandardScaler', 'StandardScaler'), ('MinMaxScaler', 'MinMaxScaler'),('Normalizer', 'Normalizer'), ('Any','Any')]
-    preprocessor = SelectField('Would you like a particular Preprocessing Algorithm?',choices = my_preprocessors,render_kw={'style': 'width: 30ch'})
+    preprocessor = SelectField('Restrict Preprocessing Algorithm?',choices = my_preprocessors,render_kw={'style': 'width: 30ch'})
     my_algorithms = [('SVC', 'SVC'), ('KNeighborsClassifier', 'KNeighborsClassifier'), 
                      ('RandomForestClassifier', 'RandomForestClassifier'),('LogisticRegression','LogisticRegression'),('Any','Any')]
-    algorithm = SelectField('Would you like a particular Algorithm?',choices = my_algorithms,render_kw={'style': 'width: 30ch'})
+    algorithm = SelectField('Restrict Algorithm?',choices = my_algorithms,render_kw={'style': 'width: 30ch'})
+    hyperparam = SelectField('Restrict Hyperparameter?',choices=[('', 'Select an option')],render_kw={'style': 'width: 30ch'})
+    hyperparam_value = DecimalField('Hyperparameter Value',render_kw={'style': 'width: 30ch'})
 
     submit = SubmitField('Submit')
 
@@ -125,8 +127,9 @@ def eval_const():
 
     if request.method == 'GET':
 
-        algorithm_constraint, prepro_constraint = recommendation(stage = 2, task = session['Task'], 
-                                                                 evalRequirement = session['evalRequirement'], algoConst = session['algoConst'])
+        algorithm_constraint, prepro_constraint, metric = recommendation(stage = 2, task = session['Task'], 
+                                                                 evalRequirement = session['evalRequirement'], 
+                                                                 algoConst = session['algoConst'])
         
         form.algorithm.data = algorithm_constraint
 
@@ -135,11 +138,9 @@ def eval_const():
         else:
             form.prepro.data = True
             form.preprocessor.data = prepro_constraint
-
-
-
-
-
+        
+        form.metric.data = metric
+        form.time.data = int(20)
 
         return render_template("home.html",
                                form = form)
@@ -148,9 +149,10 @@ def eval_const():
 
         data = {'User':form.name.data,'Intent':form.intent.data,'Dataset':form.dataset.data,'Time':float(form.time.data),
                 'Metric':form.metric.data,'Preprocessing':form.prepro.data,'Algorithm':form.algorithm.data,
-                'PreproAlgorithm':form.preprocessor.data}
-        
-        print(data)
+                'PreproAlgorithm':form.preprocessor.data, 'Hyperparameter':form.hyperparam.data,
+                'Hyperparameter_value': float(form.hyperparam_value.data)}
+
+
         score = pipeline_generator(data)
         session['score'] = score
         return redirect(url_for('views.feedback_screen'))
@@ -172,7 +174,6 @@ def feedback_screen():
                                form = feedback,data = session['score'])
     
     elif request.method == 'POST':
-        print(feedback.rating.data,feedback.feedback.data)
 
         generate_rest(feedback=[feedback.rating.data,feedback.feedback.data],current_time = session['current_time'],
                       user = session['User'],dataset = session['Dataset'],

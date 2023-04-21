@@ -1,0 +1,4 @@
+<http://localhost/8080/intentOntology#TaskGerardiris-1682088080> <http://localhost/8080/intentOntology#hasRequirement> <http://localhost/8080/intentOntology#EvalRequirementGerardiris-1682088080> .
+<http://localhost/8080/intentOntology#TaskGerardiris-1682088080> <http://localhost/8080/intentOntology#hasIntent> <http://localhost/8080/intentOntology#Classification> .
+<http://localhost/8080/intentOntology#TaskGerardiris-1682088080> <http://localhost/8080/intentOntology#hasConstraint> <http://localhost/8080/intentOntology#GerardirisAlgorithmConstraint-1682088080> .
+

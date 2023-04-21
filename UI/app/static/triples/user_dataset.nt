@@ -1,0 +1,5 @@
+<http://localhost/8080/intentOntology#Gerard> <http://localhost/8080/intentOntology#runs> <http://localhost/8080/intentOntology#WorflowGerardiris-1682088080> .
+<http://localhost/8080/intentOntology#WorflowGerardiris-1682088080> <http://localhost/8080/intentOntology#achieves> <http://localhost/8080/intentOntology#TaskGerardiris-1682088080> .
+<http://localhost/8080/intentOntology#WorflowGerardiris-1682088080> <http://localhost/8080/intentOntology#hasInput> <http://localhost/8080/intentOntology#iris> .
+<http://localhost/8080/intentOntology#iris> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.e-lico.eu/ontologies/dmo/DMOP/DMOP.owl#DataSet> .
+

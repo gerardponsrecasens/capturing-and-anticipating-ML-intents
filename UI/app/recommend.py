@@ -140,17 +140,9 @@ def recommendation(stage, task, evalRequirement = None, algoConst = None,
         head_idx = entity_name_to_idx[str(algoConst)]
         relation_idx = relation_name_to_idx['http://localhost/8080/intentOntology#on']
 
-        tail_idx = entity_name_to_idx['http://localhost/8080/intentOntology#sklearn-SVC']
-        algorithm_scores.append(model.scoring_function(torch.tensor([head_idx]),torch.tensor([tail_idx]),torch.tensor([relation_idx])))  
-
-        tail_idx = entity_name_to_idx['http://localhost/8080/intentOntology#sklearn-RandomForestClassifier']
-        algorithm_scores.append(model.scoring_function(torch.tensor([head_idx]),torch.tensor([tail_idx]),torch.tensor([relation_idx])))  
-
-        tail_idx = entity_name_to_idx['http://localhost/8080/intentOntology#sklearn-LogisticRegression']
-        algorithm_scores.append(model.scoring_function(torch.tensor([head_idx]),torch.tensor([tail_idx]),torch.tensor([relation_idx])))  
-
-        tail_idx = entity_name_to_idx['http://localhost/8080/intentOntology#sklearn-KNeighborsClassifier']
-        algorithm_scores.append(model.scoring_function(torch.tensor([head_idx]),torch.tensor([tail_idx]),torch.tensor([relation_idx])))  
+        for algorithm in algorithms:
+            tail_idx = entity_name_to_idx['http://localhost/8080/intentOntology#sklearn-'+algorithm]
+            algorithm_scores.append(model.scoring_function(torch.tensor([head_idx]),torch.tensor([tail_idx]),torch.tensor([relation_idx])))
 
 
         algorithm_constraint = algorithms[algorithm_scores.index(max(algorithm_scores))]
@@ -174,5 +166,21 @@ def recommendation(stage, task, evalRequirement = None, algoConst = None,
 
         prepro_constraint = algorithms[algorithm_scores.index(max(algorithm_scores))]
 
-        return algorithm_constraint, prepro_constraint
+
+        # RECOMMEND METRIC
+
+        metrics = ['F1','AUC','Precision','Accuracy']
+        metrics_scores = []
+
+        head_idx = entity_name_to_idx[str(evalRequirement)]
+        relation_idx = relation_name_to_idx['http://localhost/8080/intentOntology#onMetric']
+
+        for metric in metrics:
+            tail_idx = entity_name_to_idx['http://localhost/8080/intentOntology#'+metric]
+            metrics_scores.append(model.scoring_function(torch.tensor([head_idx]),torch.tensor([tail_idx]),torch.tensor([relation_idx])))
+
+        metric = metrics[metrics_scores.index(max(metrics_scores))]
+
+
+        return algorithm_constraint, prepro_constraint ,metric
 

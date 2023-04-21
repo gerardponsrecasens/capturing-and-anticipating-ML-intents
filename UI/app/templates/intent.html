@@ -3,6 +3,7 @@
 {% block title %}User Input{% endblock %} 
 
 {% block content%}
+<div id="content-wrapper">
   <h1>User Input</h1>
   <br/>
     <form method="POST">
@@ -29,13 +30,24 @@
 
       <!-- Styles to change default settings of the checkbox-->
 
-      <style>
-        .form-check-input[type=checkbox] {
-          width: 30px;
-          height: 30px;
-        }
-        </style>
-
 
     </form>
+  </div>
+
+    <style>  
+      #content-wrapper {
+        height: 50vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+      </style>
+
+  <style>
+  .form-check-input[type=checkbox] {
+    width: 30px;
+    height: 30px;
+  }
+  </style>
 {% endblock %}
