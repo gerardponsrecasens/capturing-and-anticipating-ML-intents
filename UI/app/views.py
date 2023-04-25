@@ -150,7 +150,7 @@ def eval_const():
         data = {'User':form.name.data,'Intent':form.intent.data,'Dataset':form.dataset.data,'Time':float(form.time.data),
                 'Metric':form.metric.data,'Preprocessing':form.prepro.data,'Algorithm':form.algorithm.data,
                 'PreproAlgorithm':form.preprocessor.data, 'Hyperparameter':form.hyperparam.data,
-                'Hyperparameter_value': float(form.hyperparam_value.data)}
+                'Hyperparameter_value': int(form.hyperparam_value.data)}
 
 
         score = pipeline_generator(data)
