@@ -16,7 +16,7 @@ tf = TriplesFactory.from_path(r'filtered.tsv')
 training, testing = tf.split(random_state = 1998)
 
 
-epochs = 500
+epochs = 300
 models = ['TransE','TransH','TransR','ComplEx','RotatE','DistMult']
 emb_dimensions = [2,8,16,32,64]
 learning_rates = [0.001,0.01]
@@ -55,6 +55,7 @@ for model in models:
                     training_kwargs = training_kwargs,
                     optimizer_kwargs = optimizer_kwargs,
                     evaluation_kwargs = evaluation_kwargs,
+                    negative_sampler_kwargs = negative_sampler_kwargs,
                     evaluation_relation_whitelist = evaluation_relation_whitelist if filtered_evaluation else None,
                     negative_sampler = 'bernoulli',
                     device = 'gpu',
