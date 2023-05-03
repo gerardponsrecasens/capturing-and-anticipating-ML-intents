@@ -4,7 +4,7 @@ from rdflib import Graph, URIRef, XSD
 from rdflib.namespace import  RDF,RDFS
 
 '''
-This script creates the Intent Ontology, linked to DMOP and Person, as of 29/03/2023
+This script creates the Intent Ontology, linked to DMOP and Person, as of 02/05/2023
 '''
 
 g = Graph()
@@ -72,10 +72,6 @@ g.add((implementation,RDFS.subClassOf,URIRef(dmop+'DM-Operator')))
 # Algorithm/Preprocess
 algoprepro = URIRef(dmop+'DM-Algorithm')
 
-# # Model
-# model = URIRef(uri+'Model')
-# g.add((model,RDF.type,RDFS.Class))
-
 # Model Evaluation
 modelEval = URIRef(uri+'ModelEvaluation')
 g.add((modelEval,RDF.type,RDFS.Class))
@@ -101,6 +97,22 @@ Constraint = URIRef(uri+'Constraint')
 g.add((Constraint,RDF.type,RDFS.Class))
 g.add((Constraint,RDFS.subClassOf,URIRef(dolce+'non-physical-endurant')))
 
+# ConstraintHyperparameter
+HypConstraint = URIRef(uri+'ConstraintHyperparameter')
+g.add((HypConstraint,RDF.type,RDFS.Class))
+g.add((HypConstraint,RDFS.subClassOf,Constraint))
+
+
+# ConstraintWorkfloCharacteristic
+WorkflowConstraint = URIRef(uri+'ConstraintWorkflow')
+g.add((WorkflowConstraint,RDF.type,RDFS.Class))
+g.add((WorkflowConstraint,RDFS.subClassOf,Constraint))
+
+# ConstraintAlgorithm
+AlgoConstraint = URIRef(uri+'ConstraintAlgorithm')
+g.add((AlgoConstraint,RDF.type,RDFS.Class))
+g.add((AlgoConstraint,RDFS.subClassOf,Constraint))
+
 #Min-Max-Equal
 MinMaxEqual = URIRef(uri+'Min-Max-Equal')
 g.add((MinMaxEqual,RDF.type,RDFS.Class))
@@ -113,11 +125,6 @@ g.add((UseNoUse,RDFS.subClassOf,URIRef(dmop+'DecisionStrategy')))
 
 # Workflow Characteristic  (we add the particular workflo char. as a sublass of them: memory, speed...)
 genericWorkflowCharacteristic = ns_dmop.WorkflowCharacteristic
-
-#Specific Constraint
-speCon = URIRef(uri+'SpecificConstraint')
-g.add((speCon,RDF.type,RDFS.Class))
-g.add((speCon,RDFS.subClassOf,URIRef(dmop+'DecisionStrategy')))
 
 
 ###### PROPERTIES ######
@@ -180,6 +187,16 @@ hasConstraint = URIRef(uri+'hasConstraint')
 g.add((hasConstraint,RDF.type,RDF.Property))
 g.add((hasConstraint,RDFS.domain,task))
 g.add((hasConstraint,RDFS.range,Constraint))
+
+# Has Constraint Value: a task can have a value constraint
+hasConstraintValue = URIRef(uri+'hasConstraintValue')
+g.add((hasConstraintValue,RDF.type,RDF.Property))
+g.add((hasConstraintValue,RDFS.domain,task))
+
+# On constraint: the blank node of a Constraint Value links to the Constraint
+onC = URIRef(uri+'onConstraint')
+g.add((onC,RDF.type,RDF.Property))
+g.add((onC,RDFS.range,Constraint))
 
 # On: on what the constraint is imposed (e.g., hyperparameter, implementation, workflow characteristic)
 on = URIRef(uri+'on')
@@ -340,6 +357,9 @@ g.add((classification,RDF.type,intent))
 g.add((regression,RDF.type,intent))
 g.add((clustering,RDF.type,intent))
 
+
+not_use_pre = URIRef(uri+'ConstraintNoPreprocessing')
+g.add((not_use_pre,RDF.type,Constraint))
 
 
 

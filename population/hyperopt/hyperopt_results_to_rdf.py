@@ -3,7 +3,7 @@ import time
 import os
 import pickle
 from random import randrange
-from rdflib import Graph, URIRef, XSD, Literal
+from rdflib import Graph, URIRef, XSD, Literal, BNode
 from rdflib.namespace import  RDF,RDFS
 
 
@@ -11,9 +11,9 @@ from rdflib.namespace import  RDF,RDFS
 Script to generate RDF triples from the HyperOpt results.
 '''
 
-input_path = r'./store/'
+input_path = r'./store/constraint/'
 output_path = "RDFtriples.nt"
-
+classification = True
 
 g = Graph()
 
@@ -72,24 +72,23 @@ for file in files:
 
     use = URIRef(uri+'Use')
     no_use = URIRef(uri+'NoUse')
-    g.add((use,RDF.type,URIRef(uri+'Use-NoUse')))
-    g.add((no_use,RDF.type,URIRef(uri+'Use-NoUse')))
 
     maximize = URIRef(uri+'Max')
     minimize = URIRef(uri+'Min')
     equal = URIRef(uri+'Equal')
-    g.add((maximize,RDF.type,URIRef(uri+'Min-Max-Equal')))
-    g.add((minimize,RDF.type,URIRef(uri+'Min-Max-Equal')))
-    g.add((equal,RDF.type,URIRef(uri+'Min-Max-Equal')))
-
 
 
     # Task: Requirements 
-    intent = URIRef(uri+'Predict')
+
+    if classification:
+        intent = URIRef(uri+'Classification')
+    else:
+        intent = URIRef(uri+'Regression')
+        
     g.add((task,ns.hasIntent,intent))
 
 
-    evalRequirement = URIRef(uri+'EvalRequirement'+user_name+dataset_name+'-'+current_time)
+    evalRequirement = URIRef(uri+'EvalReq'+data['metric_name']+'TrainTestSplit')
     traintestsplit = URIRef(uri+'TrainTestSplit')
     metric = URIRef(uri+data['metric_name'])
 
@@ -97,8 +96,6 @@ for file in files:
     g.add((evalRequirement,ns.withMethod,traintestsplit))
     g.add((evalRequirement,ns.onMetric,metric))
     g.add((evalRequirement,ns.howEval,maximize))
-    # g.add((evalRequirement,ns.hasValue,Literal(80, datatype=XSD.integer)))
-    # g.add((evalRequirement,ns.isSatisfied,Literal('true', datatype=XSD.boolean)))
 
     modelEval = URIRef(uri+'ModelEval'+user_name+dataset_name+'-'+current_time)
     g.add((workflow,ns.hasOutput,modelEval))
@@ -111,11 +108,11 @@ for file in files:
     algorithm_constraint = data.get('algorithm_constraint', None)
 
     if algorithm_constraint:
-        const = URIRef(uri+user_name+dataset_name+'AlgorithmConstraint'+'-'+current_time)
+        const = URIRef(uri+'Constraint'+'sklearn-'+algorithm_constraint)
+        g.add((const,RDF.type,URIRef(uri+'ConstraintAlgorithm')))
         g.add((task,ns.hasConstraint,const))
         g.add((const,ns.isHard,Literal(True, datatype=XSD.boolean)))
         g.add((const,ns.howConstraint,use))
-        g.add((const,ns.isSatisfied,Literal(True, datatype=XSD.boolean)))
         g.add((const,ns.on,URIRef(uri+'sklearn-'+algorithm_constraint)))
 
 
@@ -123,48 +120,58 @@ for file in files:
     
     if hyp_constraint:
         for i,hycon in enumerate(hyp_constraint):
-            const = URIRef(uri+user_name+dataset_name+'HypConstraint'+str(i)+'-'+current_time)
+            const = URIRef(uri+'Constraint'+algorithm_constraint+'-'+hycon)
+            g.add((const,RDF.type,URIRef(uri+'ConstraintHyperparameter')))
             g.add((task,ns.hasConstraint,const))
             g.add((const,ns.isHard,Literal(True, datatype=XSD.boolean)))
-            g.add((const,ns.isSatisfied,Literal(True, datatype=XSD.boolean)))
             g.add((const,ns.howConstraint,equal))
+
+
             value = hyp_constraint[hycon]
+            bn = BNode()
+            g.add((task,ns.hasConstraintValue,bn))
+            g.add((bn,ns.onConstraint,const))
+
             if type(value)==int:
-                g.add((const,ns.hasValue,Literal(value, datatype=XSD.integer)))
+                g.add((bn,ns.hasValue,Literal(value, datatype=XSD.integer)))
             elif type(value)==float:
-                g.add((const,ns.hasValue,Literal(value, datatype=XSD.float)))
+                g.add((bn,ns.hasValue,Literal(value, datatype=XSD.float)))
             elif type(value)==str:
-                g.add((const,ns.hasValue,Literal(value, datatype=XSD.string)))
+                g.add((bn,ns.hasValue,Literal(value, datatype=XSD.string)))
             elif type(value)==bool:
-                g.add((const,ns.hasValue,Literal(value, datatype=XSD.boolean)))
+                g.add((bn,ns.hasValue,Literal(value, datatype=XSD.boolean)))
 
             g.add((const,ns.on,URIRef(uri+'sklearn-'+algorithm_constraint+'-'+hycon)))
 
 
     preprocessor_constraint = data.get('preprocessor_constraint', None)
-    not_use_pre = URIRef(uri+'NoPreprocessingConstraint')
-    g.add((not_use_pre,RDF.type,ns.SpecificConstraint))
+    not_use_pre = URIRef(uri+'ConstraintNoPreprocessing')
 
 
     if preprocessor_constraint:
-        const = URIRef(uri+user_name+dataset_name+'PreprocessorConstraint'+'-'+current_time)
-        g.add((task,ns.hasConstraint,const))
-        g.add((const,ns.isHard,Literal(True, datatype=XSD.boolean)))
-        g.add((const,ns.isSatisfied,Literal(True, datatype=XSD.boolean)))
         if preprocessor_constraint != 'NoPre':
+            const = URIRef(uri+'Constraint'+'sklearn-'+preprocessor_constraint)
+            g.add((const,RDF.type,URIRef(uri+'ConstraintAlgorithm')))
+            g.add((task,ns.hasConstraint,const))
             g.add((const,ns.howConstraint,use))
             g.add((const,ns.on,URIRef(uri+'sklearn-'+preprocessor_constraint)))
         else: 
-            g.add((const,ns.on,not_use_pre))
+            g.add((task,ns.hasConstraint,not_use_pre))
+            g.add((const,ns.isHard,Literal(True, datatype=XSD.boolean)))
 
     max_time = data.get('max_time', None)
     
     if optimization_time and max_time:
-        const = URIRef(uri+user_name+dataset_name+'TimeConstraint'+'-'+current_time)
+        const = URIRef(uri+'TimeConstraint')
+        g.add((const,RDF.type,URIRef(uri+'ConstraintWorkflow')))
         g.add((task,ns.hasConstraint,const))
         g.add((const,ns.on,opt_time))
         g.add((const,ns.isHard,Literal(True, datatype=XSD.boolean)))
-        g.add((const,ns.hasValue,Literal(max_time, datatype=XSD.boolean)))
+
+        bn = BNode()
+        g.add((task,ns.hasConstraintValue,bn))
+        g.add((bn,ns.onConstraint,const))
+        g.add((bn,ns.hasValue,Literal(max_time, datatype=XSD.boolean)))
         
 
     ## PIPELINE AND STEPS
