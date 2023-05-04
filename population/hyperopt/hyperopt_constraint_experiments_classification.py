@@ -1,4 +1,5 @@
 from hpsklearn import HyperoptEstimator, any_classifier, any_preprocessing, svc,random_forest_classifier,k_neighbors_classifier,logistic_regression
+from hpsklearn import linear_discriminant_analysis, mlp_classifier, quadratic_discriminant_analysis, gradient_boosting_classifier
 from hpsklearn import standard_scaler, min_max_scaler, normalizer
 from sklearn.metrics import roc_auc_score, f1_score, accuracy_score, precision_score
 from hyperopt import tpe
@@ -8,6 +9,7 @@ import os
 import pandas as pd
 import random
 import time
+import uuid
 
 
 '''
@@ -19,7 +21,7 @@ classification algorithms, their hyperparameters and the preprocessing
 
 # User inputs
 
-user = 'User10'
+
 max_evals = 15
 max_time = 2250
 input_path = r'./datasets/'
@@ -47,21 +49,23 @@ scorer = {'Accuracy':accuracy_loss,'F1':f1_loss,'AUC':auc_loss,'Precision':preci
 
 # Helper functions
 
-def define_classifier(algorithm,args={}):
+classifiers = {
+    'SVC': svc,
+    'RandomForestClassifier': random_forest_classifier,
+    'LogisticRegression': logistic_regression,
+    'KNeighborsClassifier': k_neighbors_classifier,
+    'GradientBoostingClassifier': gradient_boosting_classifier,
+    'QuadraticDiscriminantAnalysis': quadratic_discriminant_analysis,
+    'MLPClassifier': mlp_classifier,
+    'LinearDiscriminantAnalysis': linear_discriminant_analysis,
+}
 
+def define_classifier(algorithm, args={}):
     '''
     Defines an algorithm and hyperparameter restriction in the HyperOpt syntax.
     '''
-    if algorithm == 'SVC':
-        return svc('my_svc',**args)
-    elif algorithm == 'RandomForestClassifier':
-        return random_forest_classifier('my_rf',**args)
-    elif algorithm == 'LogisticRegression':
-        return logistic_regression('my_lr',**args)
-    elif algorithm == 'KNeighborsClassifier':
-        return k_neighbors_classifier('my_knc',**args)
-    else:
-        return any_classifier("my_clf")
+    clf = classifiers.get(algorithm, any_classifier)
+    return clf('my_clf', **args)
 
 
 def get_score(metric_name,y_pred,y_test):
@@ -79,19 +83,24 @@ def get_score(metric_name,y_pred,y_test):
 if __name__ == "__main__":
 
     datasets = os.listdir(input_path) 
-
+    random.shuffle(datasets)
     # Define Constraint Space (Classifiers (w/ hyperparameters) and Preprocessors)
 
     different_classifiers = {'SVC':{'C':[0.01,0.1,1,10],'kernel':['linear','poly','rbf']},
                             'RandomForestClassifier':{'n_estimators':[100,150,200],'max_depth':[2,3,4,5,6,7],'criterion':['gini','entropy']},
                             'LogisticRegression':{'penalty':['l1','l2'],'C':[0.01,0.1,1,10]},
-                            'KNeighborsClassifier':{'n_neighbors':[3,5,7],'weights':['uniform','distance']}}
+                            'KNeighborsClassifier':{'n_neighbors':[3,5,7],'weights':['uniform','distance']},
+                            'GradientBoostingClassifier':{},
+                            'QuadraticDiscriminantAnalysis':{},
+                            'MLPClassifier':{},
+                            'LinearDiscriminantAnalysis':{}}
 
     different_preprocessors = {'NoPre':[],'StandardScaler':[standard_scaler('my_pre')],'MinMaxScaler':[min_max_scaler('my_pre')],'Normalizer':[normalizer('my_pre')]} 
 
 
     for current_link in datasets:
 
+        user = random.choice(['User10','User11','User12','User13'])
         metric_name = random.choice(['F1','AUC','Precision','Accuracy'])
 
         idx = current_link.split('.')[0]
@@ -148,7 +157,7 @@ if __name__ == "__main__":
                    'preprocessor_constraint':preprocessor,'max_time':max_time,'time':end-start}
 
 
-        with open(output_path+ds+'.pickle', 'wb') as handle:
+        with open(output_path+str(uuid.uuid4())+'.pickle', 'wb') as handle:
             pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
         print(estim.score(X_test, y_test))

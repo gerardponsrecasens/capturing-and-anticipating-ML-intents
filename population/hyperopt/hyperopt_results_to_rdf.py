@@ -11,7 +11,7 @@ from rdflib.namespace import  RDF,RDFS
 Script to generate RDF triples from the HyperOpt results.
 '''
 
-input_path = r'./store/constraint/'
+input_path = r'./store/'
 output_path = "RDFtriples.nt"
 classification = True
 
