@@ -5,22 +5,21 @@ import torch
 
 
 # Indicate if in evaluation the relationships should be filtered
-filtered_evaluation = False
-evaluation_relation_whitelist = {'<http://localhost/8080/intentOntology#on>', 
-                                 '<http://localhost/8080/intentOntology#hasIntent>',
-                                 '<http://localhost/8080/intentOntology#onMetric>',
-                                 '<http://localhost/8080/intentOntology#withMethod>'}
+filtered_evaluation = True
+evaluation_relation_whitelist = {'<http://localhost/8080/intentOntology#hasConstraint>', 
+                                 '<http://localhost/8080/intentOntology#hasIntent>'}
 
 # Load dataset
-tf = TriplesFactory.from_path(r'filtered.tsv')
-training, testing = tf.split(random_state = 1998)
+tf = TriplesFactory.from_path(r'all_clean.tsv')
+training, testing, validation = tf.split([.8, .1, .1], random_state = 1998)
 
 
 epochs = 300
-models = ['TransE','TransH','TransR','ComplEx','RotatE','DistMult']
+models = ['TransE','TransH','DistMult','ComplEx','RotatE','TransR']
 emb_dimensions = [2,8,16,32,64]
 learning_rates = [0.001,0.01]
 num_negatives = [1,10,20]
+
 
 
 
@@ -50,6 +49,7 @@ for model in models:
                     model = model,
                     training = training,
                     testing = testing,
+                    validation = validation,
                     training_loop = 'slcwa',
                     model_kwargs = model_kwargs,
                     training_kwargs = training_kwargs,
@@ -58,13 +58,15 @@ for model in models:
                     negative_sampler_kwargs = negative_sampler_kwargs,
                     evaluation_relation_whitelist = evaluation_relation_whitelist if filtered_evaluation else None,
                     negative_sampler = 'bernoulli',
+                    stopper = 'early',
                     device = 'gpu',
                     random_seed=1998
                 )
 
 
                 parameters = {'model':model,'emb_dim':emb_dimension,'learning_rate':learning_rate,
-                              'negative_per_pos':num_negative,'n_epochs':epochs}
+                              'negative_per_pos':num_negative,'n_epochs':epochs, 'filtered_eval':filtered_evaluation
+                              }
                 test_results = pipe.metric_results.to_df()
 
 
