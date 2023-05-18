@@ -57,6 +57,7 @@ for model in models:
                     evaluation_kwargs = evaluation_kwargs,
                     negative_sampler_kwargs = negative_sampler_kwargs,
                     evaluation_relation_whitelist = evaluation_relation_whitelist if filtered_evaluation else None,
+                    metric = 'hits@3',
                     negative_sampler = 'bernoulli',
                     stopper = 'early',
                     device = 'gpu',
