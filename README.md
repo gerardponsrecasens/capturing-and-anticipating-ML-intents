@@ -12,7 +12,8 @@ To achieve it, different steps have been followed:
 
 
 
-![workflow_22_03](https://user-images.githubusercontent.com/95172600/227177301-b1ebdca0-13df-4411-9576-739da2e3bef8.png)
+![image](https://github.com/gerardponsrecasens/capturing-and-anticipating-ML-intents/assets/95172600/95dda1c3-cd15-4ff8-9afa-6354e2b50e16)
+
 
 
 The repository is organized as follows: in the *Ontology* folder, the ontology .owl/.nt files can be found, alongside with the scripts used to generate them. Then, in the ontology *Population* folder the scripts for creating the instances from the different sources can be found. Finally, the *Recommender* folder contains the scripts and demos for the recommender system.
