@@ -1,6 +1,6 @@
 from hpsklearn import HyperoptEstimator, any_classifier, any_preprocessing, svc,random_forest_classifier,k_neighbors_classifier,logistic_regression
 from hpsklearn import standard_scaler, min_max_scaler, normalizer
-from sklearn.metrics import roc_auc_score, f1_score, accuracy_score, precision_score
+from sklearn.metrics import roc_auc_score, f1_score, accuracy_score, precision_score, confusion_matrix
 from hyperopt import tpe
 import numpy as np
 import pickle
@@ -8,6 +8,8 @@ import os
 import pandas as pd
 import random
 import time
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 '''
@@ -154,6 +156,16 @@ def pipeline_generator(user_input):
 
     with open(output_path+'model.pickle', 'wb') as handle:
         pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    cm = confusion_matrix(y_test, y_pred)
+    sns.heatmap(cm, annot=True, cmap='Blues', fmt='d', cbar=False)
+    plt.xlabel('Predicted')
+    plt.ylabel('True')
+    plt.title('Confusion Matrix')
+
+    # Save the plot to a file
+    plt.savefig('./app/static/images/confusion_matrix.png')
+
 
     return(np.round(estim.score(X_test, y_test),2))
 

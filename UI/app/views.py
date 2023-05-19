@@ -152,7 +152,7 @@ def eval_const():
                 'PreproAlgorithm':form.preprocessor.data, 'Hyperparameter':form.hyperparam.data,
                 'Hyperparameter_value': int(form.hyperparam_value.data)}
 
-
+        session['metric'] = form.metric.data
         score = pipeline_generator(data)
         session['score'] = score
         return redirect(url_for('views.feedback_screen'))
@@ -171,7 +171,7 @@ def feedback_screen():
     feedback = ratingForm()
     if request.method == 'GET':
         return render_template("feedback.html",
-                               form = feedback,data = session['score'])
+                               form = feedback,data = session['score'], metric = session['metric'])
     
     elif request.method == 'POST':
 

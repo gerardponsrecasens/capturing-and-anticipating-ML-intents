@@ -35,7 +35,9 @@
 
 <h1>RESULTS</h1>
 <br/>
-Your score is of <b>{{data}}</b>. 
+Your {{metric}} score is of <b>{{data}}</b>. 
+<br/>
+<img src="{{ url_for('static', filename='images/confusion_matrix.png') }}" alt="Your Image">
 <br/>
 <br/>
 <form method="POST">
