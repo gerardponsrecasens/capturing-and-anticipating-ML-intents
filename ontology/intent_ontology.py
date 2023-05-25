@@ -113,6 +113,11 @@ AlgoConstraint = URIRef(uri+'ConstraintAlgorithm')
 g.add((AlgoConstraint,RDF.type,RDFS.Class))
 g.add((AlgoConstraint,RDFS.subClassOf,Constraint))
 
+# ConstraintPreprocessingAlgorithm
+AlgoConstraint = URIRef(uri+'ConstraintPreprocessingAlgorithm')
+g.add((AlgoConstraint,RDF.type,RDFS.Class))
+g.add((AlgoConstraint,RDFS.subClassOf,Constraint))
+
 #Min-Max-Equal
 MinMaxEqual = URIRef(uri+'Min-Max-Equal')
 g.add((MinMaxEqual,RDF.type,RDFS.Class))

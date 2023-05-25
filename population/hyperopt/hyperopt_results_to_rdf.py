@@ -151,7 +151,7 @@ for file in files:
     if preprocessor_constraint:
         if preprocessor_constraint != 'NoPre':
             const = URIRef(uri+'Constraint'+'sklearn-'+preprocessor_constraint)
-            g.add((const,RDF.type,URIRef(uri+'ConstraintAlgorithm')))
+            g.add((const,RDF.type,URIRef(uri+'ConstraintPreprocessingAlgorithm')))
             g.add((task,ns.hasConstraint,const))
             g.add((const,ns.howConstraint,use))
             g.add((const,ns.on,URIRef(uri+'sklearn-'+preprocessor_constraint)))
