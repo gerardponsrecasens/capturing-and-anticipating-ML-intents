@@ -3,8 +3,9 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField,SelectField,FileField,DecimalField,BooleanField,TextAreaField,RadioField
 from wtforms.validators import DataRequired, NumberRange
 from .generate_pipeline import pipeline_generator
-from .generate_triples import generate_triples, generate_user_dataset, generate_intent, generate_rest
+from .generate_triples import generate_user_dataset, generate_intent, generate_all
 from .recommend import recommendation
+from .queries import get_algorithm, get_intent, get_metric,get_preprocessing,get_preprocessing_algorithm
 
 
 # Create Form Class for the User Input. They are structured so that the recommendation engine
@@ -78,6 +79,8 @@ def home():
     elif request.method == 'POST':
 
         print(form.name.data)
+
+        session['Anticipation'] = 'query'
         session['User'] = form.name.data
         session['Dataset'] = form.dataset.data
 
@@ -98,10 +101,18 @@ def intent():
     form = intentForm()
     form.name.data = session['User']
     form.dataset.data = session['Dataset']
+
+    print(session['User'],session['Dataset'])
     if request.method == 'GET':
-        form.intent.data = recommendation(stage=1, task = session['Task'])
-        return render_template("intent.html",
-                               form = form)
+
+        if session['Anticipation'] == 'query':
+            form.intent.data = get_intent(session['User'],session['Dataset']).split('#')[1]
+            return render_template("intent.html",
+                                form = form)
+        else:
+            form.intent.data = recommendation(stage=1, task = session['Task'])
+            return render_template("intent.html",
+                                form = form)
     
     elif request.method == 'POST':
 
@@ -127,23 +138,35 @@ def eval_const():
 
     if request.method == 'GET':
 
-        algorithm_constraint, prepro_constraint, metric = recommendation(stage = 2, task = session['Task'], 
-                                                                 evalRequirement = session['evalRequirement'], 
-                                                                 algoConst = session['algoConst'])
-        
-        form.algorithm.data = algorithm_constraint
+        if session['Anticipation'] == 'query':
+            form.time.data = int(20)
+            form.algorithm.data = get_algorithm(session['User'],session['Dataset'],session['Intent']).split('-')[1]
+            form.prepro.data = get_preprocessing(session['User'],session['Dataset'],session['Intent'])
+            form.preprocessor.data = get_preprocessing_algorithm(session['User'],session['Dataset'],session['Intent']).split('-')[1]
+            form.metric.data = get_metric(session['User'],session['Dataset'],session['Intent']).split('#')[1]
 
-        if prepro_constraint == 'NoPre':
-            form.prepro.data = False
-        else:
-            form.prepro.data = True
-            form.preprocessor.data = prepro_constraint
-        
-        form.metric.data = metric
-        form.time.data = int(20)
-
-        return render_template("home.html",
+            return render_template("complete.html",
                                form = form)
+
+        else:
+            algorithm_constraint, prepro_constraint, metric = recommendation(stage = 2, task = session['Task'], 
+                                                                    evalRequirement = session['evalRequirement'], 
+                                                                    algoConst = session['algoConst'])
+            
+                        
+            form.algorithm.data = algorithm_constraint
+
+            if prepro_constraint == 'NoPre':
+                form.prepro.data = False
+            else:
+                form.prepro.data = True
+                form.preprocessor.data = prepro_constraint
+            
+            form.metric.data = metric
+            form.time.data = int(20)
+
+            return render_template("complete.html",
+                                form = form)
     
     elif request.method == 'POST':
 
@@ -175,10 +198,11 @@ def feedback_screen():
     
     elif request.method == 'POST':
 
-        generate_rest(feedback=[feedback.rating.data,feedback.feedback.data],current_time = session['current_time'],
+        generate_all(feedback=[feedback.rating.data,feedback.feedback.data],current_time = session['current_time'],
                       user = session['User'],dataset = session['Dataset'],
                       workflow = session['Workflow'],task = session['Task'],
                       evalRequirement = session['evalRequirement'],algoConst = session['algoConst'])
+        
         #TO DO: incorporate COMMENT in feedback
 
         return redirect(url_for('views.home'))

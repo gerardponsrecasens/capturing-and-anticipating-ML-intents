@@ -3,7 +3,7 @@ import time
 import os
 import pickle
 from random import randrange
-from rdflib import Graph, URIRef, XSD, Literal
+from rdflib import Graph, URIRef, XSD, Literal, BNode
 from rdflib.namespace import  RDF,RDFS
 
 
@@ -16,7 +16,7 @@ def generate_triples(feedback):
 
     input_path = r'./app/static/workflow/'
     output_path = r'./app/static/triples/new_triples.nt'
-
+    general_path = '/app/static/triples/KnowledgeBase.nt'
 
     g = Graph()
 
@@ -69,22 +69,13 @@ def generate_triples(feedback):
 
         ## USER INPUT 
 
-        '''
-        In the future, the following two paragraphs should be instantiated previosly, with the creation of the ontology
-        '''
-
         use = URIRef(uri+'Use')
         no_use = URIRef(uri+'NoUse')
-        g.add((use,RDF.type,URIRef(uri+'Use-NoUse')))
-        g.add((no_use,RDF.type,URIRef(uri+'Use-NoUse')))
+
 
         maximize = URIRef(uri+'Max')
         minimize = URIRef(uri+'Min')
         equal = URIRef(uri+'Equal')
-        g.add((maximize,RDF.type,URIRef(uri+'Min-Max-Equal')))
-        g.add((minimize,RDF.type,URIRef(uri+'Min-Max-Equal')))
-        g.add((equal,RDF.type,URIRef(uri+'Min-Max-Equal')))
-
 
 
         # Task: Requirements 
@@ -92,7 +83,7 @@ def generate_triples(feedback):
         g.add((task,ns.hasIntent,intent))
 
 
-        evalRequirement = URIRef(uri+'EvalRequirement'+user_name+dataset_name+'-'+current_time)
+        evalRequirement = URIRef(uri+'EvalReq'+data['metric_name']+'TrainTestSplit')
         traintestsplit = URIRef(uri+'TrainTestSplit')
         metric = URIRef(uri+data['metric_name'])
 
@@ -100,8 +91,7 @@ def generate_triples(feedback):
         g.add((evalRequirement,ns.withMethod,traintestsplit))
         g.add((evalRequirement,ns.onMetric,metric))
         g.add((evalRequirement,ns.howEval,maximize))
-        # g.add((evalRequirement,ns.hasValue,Literal(80, datatype=XSD.integer)))
-        # g.add((evalRequirement,ns.isSatisfied,Literal('true', datatype=XSD.boolean)))
+
 
         modelEval = URIRef(uri+'ModelEval'+user_name+dataset_name+'-'+current_time)
         g.add((workflow,ns.hasOutput,modelEval))
@@ -114,11 +104,11 @@ def generate_triples(feedback):
         algorithm_constraint = data.get('algorithm_constraint', None)
 
         if algorithm_constraint and algorithm_constraint != 'Any':
-            const = URIRef(uri+user_name+dataset_name+'AlgorithmConstraint'+'-'+current_time)
+            const = URIRef(uri+'Constraint'+'sklearn-'+algorithm_constraint)
+            g.add((const,RDF.type,URIRef(uri+'ConstraintAlgorithm')))
             g.add((task,ns.hasConstraint,const))
             g.add((const,ns.isHard,Literal(True, datatype=XSD.boolean)))
             g.add((const,ns.howConstraint,use))
-            g.add((const,ns.isSatisfied,Literal(True, datatype=XSD.boolean)))
             g.add((const,ns.on,URIRef(uri+'sklearn-'+algorithm_constraint)))
 
 
@@ -126,48 +116,57 @@ def generate_triples(feedback):
         
         if hyp_constraint:
             for i,hycon in enumerate(hyp_constraint):
-                const = URIRef(uri+user_name+dataset_name+'HypConstraint'+str(i)+'-'+current_time)
+                const = URIRef(uri+'Constraint'+algorithm_constraint+'-'+hycon)
                 g.add((task,ns.hasConstraint,const))
                 g.add((const,ns.isHard,Literal(True, datatype=XSD.boolean)))
-                g.add((const,ns.isSatisfied,Literal(True, datatype=XSD.boolean)))
+                g.add((const,RDF.type,URIRef(uri+'ConstraintHyperparameter')))
                 g.add((const,ns.howConstraint,equal))
                 value = hyp_constraint[hycon]
+
+                bn = BNode()
+                g.add((task,ns.hasConstraintValue,bn))
+                g.add((bn,ns.onConstraint,const))
+
                 if type(value)==int:
-                    g.add((const,ns.hasValue,Literal(value, datatype=XSD.integer)))
+                    g.add((bn,ns.hasValue,Literal(value, datatype=XSD.integer)))
                 elif type(value)==float:
-                    g.add((const,ns.hasValue,Literal(value, datatype=XSD.float)))
+                    g.add((bn,ns.hasValue,Literal(value, datatype=XSD.float)))
                 elif type(value)==str:
-                    g.add((const,ns.hasValue,Literal(value, datatype=XSD.string)))
+                    g.add((bn,ns.hasValue,Literal(value, datatype=XSD.string)))
                 elif type(value)==bool:
-                    g.add((const,ns.hasValue,Literal(value, datatype=XSD.boolean)))
+                    g.add((bn,ns.hasValue,Literal(value, datatype=XSD.boolean)))
 
                 g.add((const,ns.on,URIRef(uri+'sklearn-'+algorithm_constraint+'-'+hycon)))
 
 
         preprocessor_constraint = data.get('preprocessor_constraint', None)
-        not_use_pre = URIRef(uri+'NoPreprocessingConstraint')
-        g.add((not_use_pre,RDF.type,ns.SpecificConstraint))
+        not_use_pre = URIRef(uri+'ConstraintNoPreprocessing')
 
 
         if preprocessor_constraint and preprocessor_constraint != 'Any':
-            const = URIRef(uri+user_name+dataset_name+'PreprocessorConstraint'+'-'+current_time)
+            const = URIRef(uri+'Constraint'+'sklearn-'+preprocessor_constraint)
             g.add((task,ns.hasConstraint,const))
             g.add((const,ns.isHard,Literal(True, datatype=XSD.boolean)))
-            g.add((const,ns.isSatisfied,Literal(True, datatype=XSD.boolean)))
             if preprocessor_constraint != 'NoPre':
                 g.add((const,ns.howConstraint,use))
                 g.add((const,ns.on,URIRef(uri+'sklearn-'+preprocessor_constraint)))
             else: 
                 g.add((const,ns.on,not_use_pre))
+                g.add((const,ns.isHard,Literal(True, datatype=XSD.boolean)))
 
         max_time = data.get('max_time', None)
         
         if optimization_time and max_time:
-            const = URIRef(uri+user_name+dataset_name+'TimeConstraint'+'-'+current_time)
+            const = URIRef(uri+'TimeConstraint')
+            g.add((const,RDF.type,URIRef(uri+'ConstraintWorkflow')))
             g.add((task,ns.hasConstraint,const))
             g.add((const,ns.on,opt_time))
             g.add((const,ns.isHard,Literal(True, datatype=XSD.boolean)))
-            g.add((const,ns.hasValue,Literal(max_time, datatype=XSD.boolean)))
+
+            bn = BNode()
+            g.add((task,ns.hasConstraintValue,bn))
+            g.add((bn,ns.onConstraint,const))
+            g.add((bn,ns.hasValue,Literal(max_time, datatype=XSD.boolean)))
             
 
         ## PIPELINE AND STEPS
@@ -225,7 +224,11 @@ def generate_triples(feedback):
             elif type(value)==bool:
                 g.add((hyperinput,ns.hasValue,Literal(value, datatype=XSD.boolean)))
 
+
     g.serialize(format="nt",destination=output_path)
+    g.parse(general_path,format='nt')
+    g.serialize(format="nt",destination=general_path)
+
 
 
 
@@ -313,7 +316,7 @@ def generate_intent(user, dataset, user_intent,task,current_time):
 
 
 
-def generate_rest(feedback,current_time,user,dataset,workflow,task,evalRequirement,algoConst):
+def generate_all(feedback,current_time,user,dataset,workflow,task,evalRequirement,algoConst):
 
     workflow = URIRef(workflow)
     task = URIRef(task)
@@ -321,12 +324,14 @@ def generate_rest(feedback,current_time,user,dataset,workflow,task,evalRequireme
     algoConst = URIRef(algoConst)
 
     input_path = r'./app/static/workflow/'
+    general_path = './app/static/triples/KnowledgeBase.nt'
     output_path = r'./app/static/triples/new_triples.nt'
 
 
     g = Graph()
     g.parse('./app/static/triples/user_dataset.nt', format="nt")
-    g.parse('./app/static/triples/intent.nt', format="nt")
+    
+    g.parse('./app/static/triples/KnowledgeBase.nt', format="nt")
 
 
     # NameSpace
@@ -391,10 +396,11 @@ def generate_rest(feedback,current_time,user,dataset,workflow,task,evalRequireme
         algorithm_constraint = data.get('algorithm_constraint', None)
 
         if algorithm_constraint and algorithm_constraint != 'Any':
+            algoConst = URIRef(uri+'Constraint'+'sklearn-'+algorithm_constraint)
+            g.add((algoConst,RDF.type,URIRef(uri+'ConstraintAlgorithm')))
             g.add((task,ns.hasConstraint,algoConst))
             g.add((algoConst,ns.isHard,Literal(True, datatype=XSD.boolean)))
             g.add((algoConst,ns.howConstraint,use))
-            g.add((algoConst,ns.isSatisfied,Literal(True, datatype=XSD.boolean)))
             g.add((algoConst,ns.on,URIRef(uri+'sklearn-'+algorithm_constraint)))
 
 
@@ -402,48 +408,57 @@ def generate_rest(feedback,current_time,user,dataset,workflow,task,evalRequireme
         
         if hyp_constraint:
             for i,hycon in enumerate(hyp_constraint):
-                const = URIRef(uri+user_name+dataset_name+'HypConstraint'+str(i)+'-'+current_time)
+                const = URIRef(uri+'Constraint'+algorithm_constraint+'-'+hycon)
+                g.add((const,RDF.type,URIRef(uri+'ConstraintHyperparameter')))
                 g.add((task,ns.hasConstraint,const))
                 g.add((const,ns.isHard,Literal(True, datatype=XSD.boolean)))
-                g.add((const,ns.isSatisfied,Literal(True, datatype=XSD.boolean)))
                 g.add((const,ns.howConstraint,equal))
+
                 value = hyp_constraint[hycon]
+                bn = BNode()
+                g.add((task,ns.hasConstraintValue,bn))
+                g.add((bn,ns.onConstraint,const))
+
                 if type(value)==int:
-                    g.add((const,ns.hasValue,Literal(value, datatype=XSD.integer)))
+                    g.add((bn,ns.hasValue,Literal(value, datatype=XSD.integer)))
                 elif type(value)==float:
-                    g.add((const,ns.hasValue,Literal(value, datatype=XSD.float)))
+                    g.add((bn,ns.hasValue,Literal(value, datatype=XSD.float)))
                 elif type(value)==str:
-                    g.add((const,ns.hasValue,Literal(value, datatype=XSD.string)))
+                    g.add((bn,ns.hasValue,Literal(value, datatype=XSD.string)))
                 elif type(value)==bool:
-                    g.add((const,ns.hasValue,Literal(value, datatype=XSD.boolean)))
+                    g.add((bn,ns.hasValue,Literal(value, datatype=XSD.boolean)))
 
                 g.add((const,ns.on,URIRef(uri+'sklearn-'+algorithm_constraint+'-'+hycon)))
 
 
         preprocessor_constraint = data.get('preprocessor_constraint', None)
-        not_use_pre = URIRef(uri+'NoPreprocessingConstraint')
-        g.add((not_use_pre,RDF.type,ns.SpecificConstraint))
+        not_use_pre = URIRef(uri+'ConstraintNoPreprocessing')
 
 
-        if preprocessor_constraint and preprocessor_constraint != 'Any':
-            const = URIRef(uri+user_name+dataset_name+'PreprocessorConstraint'+'-'+current_time)
-            g.add((task,ns.hasConstraint,const))
-            g.add((const,ns.isHard,Literal(True, datatype=XSD.boolean)))
-            g.add((const,ns.isSatisfied,Literal(True, datatype=XSD.boolean)))
+        if preprocessor_constraint and preprocessor_constraint != 'Any':   
             if preprocessor_constraint != 'NoPre':
+                const = URIRef(uri+'Constraint'+'sklearn-'+preprocessor_constraint)
+                g.add((const,RDF.type,URIRef(uri+'ConstraintPreprocessing')))
+                g.add((task,ns.hasConstraint,const))
                 g.add((const,ns.howConstraint,use))
                 g.add((const,ns.on,URIRef(uri+'sklearn-'+preprocessor_constraint)))
             else: 
-                g.add((const,ns.on,not_use_pre))
+                g.add((task,ns.hasConstraint,not_use_pre))
+                g.add((const,ns.isHard,Literal(True, datatype=XSD.boolean)))
 
         max_time = data.get('max_time', None)
         
         if optimization_time and max_time:
-            const = URIRef(uri+user_name+dataset_name+'TimeConstraint'+'-'+current_time)
+            const = URIRef(uri+'TimeConstraint')
+            g.add((const,RDF.type,URIRef(uri+'ConstraintWorkflow')))
             g.add((task,ns.hasConstraint,const))
             g.add((const,ns.on,opt_time))
             g.add((const,ns.isHard,Literal(True, datatype=XSD.boolean)))
-            g.add((const,ns.hasValue,Literal(max_time, datatype=XSD.boolean)))
+
+            bn = BNode()
+            g.add((task,ns.hasConstraintValue,bn))
+            g.add((bn,ns.onConstraint,const))
+            g.add((bn,ns.hasValue,Literal(max_time, datatype=XSD.boolean)))
             
 
         ## PIPELINE AND STEPS
@@ -502,3 +517,5 @@ def generate_rest(feedback,current_time,user,dataset,workflow,task,evalRequireme
                 g.add((hyperinput,ns.hasValue,Literal(value, datatype=XSD.boolean)))
 
     g.serialize(format="nt",destination=output_path)
+    g.parse(general_path, format="nt")
+    g.serialize(format="nt",destination=general_path)

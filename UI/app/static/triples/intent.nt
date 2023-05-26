@@ -1,4 +1,0 @@
-<http://localhost/8080/intentOntology#TaskGrairis-1682418505> <http://localhost/8080/intentOntology#hasRequirement> <http://localhost/8080/intentOntology#EvalRequirementGrairis-1682418505> .
-<http://localhost/8080/intentOntology#TaskGrairis-1682418505> <http://localhost/8080/intentOntology#hasIntent> <http://localhost/8080/intentOntology#Classification> .
-<http://localhost/8080/intentOntology#TaskGrairis-1682418505> <http://localhost/8080/intentOntology#hasConstraint> <http://localhost/8080/intentOntology#GrairisAlgorithmConstraint-1682418505> .
-
