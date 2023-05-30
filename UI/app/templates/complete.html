@@ -65,12 +65,11 @@
     <h1>User Input</h1>
     <br/>
     <form method="POST" id="my-form">
-      {{form.name.label(class='form-label')}}
-      {{form.name(class='form-control')}}
-      <br/>
-      <br/>
       <div class="row">
         <div class="col-md-6">
+          {{form.name.label(class='form-label')}}
+          {{form.name(class='form-control')}}
+          <br/>
           {{form.dataset.label(class='form-label')}}
           {{form.dataset(class='form-control')}}
           <br/>
@@ -88,6 +87,9 @@
 
         </div>
         <div class="col-md-6">
+          {{form.anticipation.label(class='form-label')}}
+          {{form.anticipation(class='form-control')}}
+          <br/>
           {{form.intent.label(class='form-label')}}
           {{form.intent(class='form-control')}}
           <br/>

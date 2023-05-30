@@ -302,27 +302,16 @@ def generate_intent(user, dataset, user_intent,task,current_time):
     intent = URIRef(uri+user_intent)
     g.add((task,ns.hasIntent,intent))
 
-    # Task: Eval Requirements
-    evalRequirement = URIRef(uri+'EvalRequirement'+user+dataset+'-'+current_time)
-    g.add((task,ns.hasRequirement,evalRequirement))
-
-    # Task: Algorithm Constraint
-    algoConst = URIRef(uri+user+dataset+'AlgorithmConstraint'+'-'+current_time)
-    g.add((task,ns.hasConstraint,algoConst))
-
     g.serialize(format="nt",destination=output_path)
 
-    return evalRequirement,algoConst
 
 
 
-def generate_all(feedback,current_time,user,dataset,workflow,task,evalRequirement,algoConst):
+def generate_all(feedback,current_time,user,dataset,workflow,task):
 
     workflow = URIRef(workflow)
     task = URIRef(task)
-    evalRequirement = URIRef(evalRequirement)
-    algoConst = URIRef(algoConst)
-
+    
     input_path = r'./app/static/workflow/'
     general_path = './app/static/triples/KnowledgeBase.nt'
     output_path = r'./app/static/triples/new_triples.nt'
@@ -379,6 +368,7 @@ def generate_all(feedback,current_time,user,dataset,workflow,task,evalRequiremen
         traintestsplit = URIRef(uri+'TrainTestSplit')
         metric = URIRef(uri+data['metric_name'])
 
+        evalRequirement = URIRef(uri+'EvalReq'+data['metric_name']+'TrainTestSplit')
         g.add((task,ns.hasRequirement,evalRequirement))
         g.add((evalRequirement,ns.withMethod,traintestsplit))
         g.add((evalRequirement,ns.onMetric,metric))
