@@ -134,12 +134,6 @@ genericWorkflowCharacteristic = ns_dmop.WorkflowCharacteristic
 
 ###### PROPERTIES ######
 
-# # Defined on: A task is defined over a dataset
-# definedOn = URIRef(uri+'definedOn')
-# g.add((definedOn,RDF.type,RDF.Property))
-# g.add((definedOn,RDFS.domain,task))
-# g.add((definedOn,RDFS.range,dataset))
-
 # Runs: a user runs a workflow
 runs = URIRef(uri+'runs')
 g.add((runs,RDF.type,RDF.Property))
@@ -243,11 +237,6 @@ g.add((hasStep,RDF.type,RDF.Property))
 g.add((hasStep,RDFS.domain,workflow))
 g.add((hasStep,RDFS.range,step))
 
-# # Realizes: the high-level view parts of a workflow (e.g., Standardize, Impute,Classify...)
-# realizes = URIRef(uri+'realizes')
-# g.add((realizes,RDF.type,RDF.Property))
-# g.add((realizes,RDFS.domain,workflow))
-# g.add((realizes,RDFS.range,algoprepro))
 
 # Followed By: A step can be followed by another
 followedBy = URIRef(uri+'followedBy')
@@ -350,17 +339,19 @@ g.add((foldCV10,RDF.type,method))
 
 
 predict = URIRef(uri+'Predict')
+g.add((predict,RDFS.subClassOf,intent))
 describe = URIRef(uri+'Describe')
+g.add((describe,RDFS.subClassOf,intent))
 explain = URIRef(uri+'Explain')
+g.add((explain,RDFS.subClassOf,intent))
+
 classification = URIRef(uri+'Classification')
 regression = URIRef(uri+'Regression')
 clustering = URIRef(uri+'Clustering')
-g.add((predict,RDF.type,intent))
-g.add((describe,RDF.type,intent))
-g.add((explain,RDF.type,intent))
-g.add((classification,RDF.type,intent))
-g.add((regression,RDF.type,intent))
-g.add((clustering,RDF.type,intent))
+
+g.add((classification,RDF.type,predict))
+g.add((regression,RDF.type,predict))
+g.add((clustering,RDF.type,describe))
 
 
 not_use_pre = URIRef(uri+'ConstraintNoPreprocessing')
