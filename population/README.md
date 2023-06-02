@@ -9,5 +9,5 @@ This folder contains scripts used to generate the ABOX (i.e., the instances) of 
 
 Additionally, there are some scripts that can be used to assisit in the creation RDF triples for the ontology:
 
-- *meta_features_generator.py*: from a dataset stored in a .csv file, it extracts its features and generates the correponding RDF triples.
+- *meta_features_generator.py*: from a dataset stored in a .csv file, it extracts its features and generates the correponding RDF triples. They can be found inside the *datasets folder*.
 - *sklearn_helper.py*: it generates the RDF triples for all the scikit-learn library classification, regression, clustering and preprocessing algorithms. Concretely, it links each algorithm implementation to the general algorithm in DMOP (or it creates it if it does not exist) and it creates the instances for each of the hyperparameters.

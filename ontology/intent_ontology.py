@@ -344,14 +344,32 @@ describe = URIRef(uri+'Describe')
 g.add((describe,RDFS.subClassOf,intent))
 explain = URIRef(uri+'Explain')
 g.add((explain,RDFS.subClassOf,intent))
+suggest = URIRef(uri+'Suggest')
+g.add((suggest,RDFS.subClassOf,intent))
+assess = URIRef(uri+'Assess')
+g.add((assess,RDFS.subClassOf,intent))
+
 
 classification = URIRef(uri+'Classification')
 regression = URIRef(uri+'Regression')
 clustering = URIRef(uri+'Clustering')
+benchmarking = URIRef(uri+'Benchmarking')
+outlier_detection = URIRef(uri+'OutlierDetection')
+kpi_assessment = URIRef(uri+'KPI_assessment')
+statistical_description = URIRef(uri+'StatisticalDescription')
+recommendation = URIRef(uri+'Recommendation')
+time_series_analysis = URIRef(uri+'TimeSeriesAnalysis')
+
 
 g.add((classification,RDF.type,predict))
 g.add((regression,RDF.type,predict))
 g.add((clustering,RDF.type,describe))
+g.add((benchmarking,RDF.type,assess))
+g.add((outlier_detection,RDF.type,describe))
+g.add((kpi_assessment,RDF.type,assess))
+g.add((statistical_description,RDF.type,explain))
+g.add((recommendation,RDF.type,suggest))
+g.add((time_series_analysis,RDF.type,predict))
 
 
 not_use_pre = URIRef(uri+'ConstraintNoPreprocessing')
