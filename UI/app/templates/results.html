@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Exploration{% endblock %}
+
+{% block content%}
+
+<style>
+    table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    th, td {
+        border: 1px solid black;
+        padding: 8px;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .header-row {
+        background-color: #cfcfcf;  /* Choose your desired background color */
+    }
+</style>
+
+
+<div id="content-wrapper">
+    <h1>Exploration</h1>
+    <br/>
+    <table>
+        <thead>
+            <tr class="header-row">
+                {% for var in results.vars %}
+                    <th>{{ var }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in results %}
+                <tr>
+                    {% for value in row %}
+                        <td>{{ value }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

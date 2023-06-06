@@ -15,10 +15,10 @@ from tqdm.autonotebook import tqdm
 import matplotlib.pyplot as plt
 from collections import defaultdict
 
-def recommendation(stage, task,
+def recommendation(stage, task, evalRequirement = None, algoConst = None,
                    n_epochs = 500, lr = 0.0001): #Stage can be 1 (recommend Intent) or 2 (recommend const)
 
-    model_path = './app/static/model/model_new_16.pt'
+    model_path = './app/static/model/model_16.pt'
 
     # Load stored model
     e,n,r,entity_name_to_idx,relation_name_to_idx,state= torch.load(model_path)
@@ -59,22 +59,15 @@ def recommendation(stage, task,
     # Update the entity and relation embeddings in the model. For the new entities intialize the 
     # weights at random.
     num_new_entities = len(entity_name_to_idx) - model.n_ent
-    print('#######################')
-    print(num_new_entities)
-    print(model.n_ent)
-
 
     if num_new_entities > 0:
         new_ent_emb = torch.randn(num_new_entities, model.emb_dim)
         updated_ent_emb = torch.nn.Parameter(torch.cat([model.ent_emb.weight, new_ent_emb], dim=0))
         model.n_ent += num_new_entities
-
+    
     # Create a new model with the complete weights and the appropriate size
     state_dict = model.state_dict()
-
-    if num_new_entities > 0:
-        state_dict['ent_emb.weight'] = updated_ent_emb
-
+    state_dict['ent_emb.weight'] = updated_ent_emb
     model = TransEModel(model.emb_dim,model.n_ent, model.n_rel)
     model.load_state_dict(state_dict)
 
@@ -127,10 +120,9 @@ def recommendation(stage, task,
         # different intents, not only classification.
 
         head_idx = entity_name_to_idx[str(task)]
-
         relation_idx = relation_name_to_idx['http://localhost/8080/intentOntology#hasIntent']
 
-        tail_idx = entity_name_to_idx['http://localhost/8080/intentOntology#Classification']
+        tail_idx = entity_name_to_idx['http://localhost/8080/intentOntology#Predict']
 
         predict_score = model.scoring_function(torch.tensor([head_idx]),torch.tensor([tail_idx]),torch.tensor([relation_idx])) 
 
@@ -145,11 +137,11 @@ def recommendation(stage, task,
         algorithms = ['SVC','KNeighborsClassifier','RandomForestClassifier','LogisticRegression']
         algorithm_scores = []
 
-        head_idx = entity_name_to_idx[str(task)]
-        relation_idx = relation_name_to_idx['http://localhost/8080/intentOntology#hasConstraint']
+        head_idx = entity_name_to_idx[str(algoConst)]
+        relation_idx = relation_name_to_idx['http://localhost/8080/intentOntology#on']
 
         for algorithm in algorithms:
-            tail_idx = entity_name_to_idx['http://localhost/8080/intentOntology#Constraintsklearn-'+algorithm]
+            tail_idx = entity_name_to_idx['http://localhost/8080/intentOntology#sklearn-'+algorithm]
             algorithm_scores.append(model.scoring_function(torch.tensor([head_idx]),torch.tensor([tail_idx]),torch.tensor([relation_idx])))
 
 
@@ -160,16 +152,16 @@ def recommendation(stage, task,
         algorithms = ['NoPre','StandardScaler','MinMaxScaler','Normalizer']
         algorithm_scores = []
 
-        tail_idx = entity_name_to_idx['http://localhost/8080/intentOntology#ConstraintNoPreprocessing']
+        tail_idx = entity_name_to_idx['http://localhost/8080/intentOntology#NoPreprocessingConstraint']
         algorithm_scores.append(model.scoring_function(torch.tensor([head_idx]),torch.tensor([tail_idx]),torch.tensor([relation_idx])))  
 
-        tail_idx = entity_name_to_idx['http://localhost/8080/intentOntology#Constraintsklearn-StandardScaler']
+        tail_idx = entity_name_to_idx['http://localhost/8080/intentOntology#sklearn-StandardScaler']
         algorithm_scores.append(model.scoring_function(torch.tensor([head_idx]),torch.tensor([tail_idx]),torch.tensor([relation_idx])))  
 
-        tail_idx = entity_name_to_idx['http://localhost/8080/intentOntology#Constraintsklearn-MinMaxScaler']
+        tail_idx = entity_name_to_idx['http://localhost/8080/intentOntology#sklearn-MinMaxScaler']
         algorithm_scores.append(model.scoring_function(torch.tensor([head_idx]),torch.tensor([tail_idx]),torch.tensor([relation_idx])))  
 
-        tail_idx = entity_name_to_idx['http://localhost/8080/intentOntology#Constraintsklearn-Normalizer']
+        tail_idx = entity_name_to_idx['http://localhost/8080/intentOntology#sklearn-Normalizer']
         algorithm_scores.append(model.scoring_function(torch.tensor([head_idx]),torch.tensor([tail_idx]),torch.tensor([relation_idx])))
 
         prepro_constraint = algorithms[algorithm_scores.index(max(algorithm_scores))]
@@ -180,11 +172,11 @@ def recommendation(stage, task,
         metrics = ['F1','AUC','Precision','Accuracy']
         metrics_scores = []
 
-        head_idx = entity_name_to_idx[str(task)]
-        relation_idx = relation_name_to_idx['http://localhost/8080/intentOntology#hasRequirement']
+        head_idx = entity_name_to_idx[str(evalRequirement)]
+        relation_idx = relation_name_to_idx['http://localhost/8080/intentOntology#onMetric']
 
         for metric in metrics:
-            tail_idx = entity_name_to_idx['http://localhost/8080/intentOntology#EvalReq'+metric+'TrainTestSplit']
+            tail_idx = entity_name_to_idx['http://localhost/8080/intentOntology#'+metric]
             metrics_scores.append(model.scoring_function(torch.tensor([head_idx]),torch.tensor([tail_idx]),torch.tensor([relation_idx])))
 
         metric = metrics[metrics_scores.index(max(metrics_scores))]

@@ -5,29 +5,23 @@
 {% block content%}
 
 <div id="content-wrapper">
-  <h1>User Input</h1>
-  <br/>
-    <form method="POST">
-
-      <div class="row">
+    <h1>User Input</h1>
+    <br/>
+      <form method="POST" class="row">
         <div class="col-md-6">
-
           {{form.name.label(class='form-label')}}
           {{form.name(class='form-control')}}
           <br/>
+          <br/>
           {{form.dataset.label(class='form-label')}}
           {{form.dataset(class='form-control')}}
-          <br/>
-
         </div>
         <div class="col-md-6">
-          {{form.anticipation.label(class='form-label')}}
-          {{form.anticipation(class='form-control')}}
-          <br/>  
+          <!-- Empty column to respect space -->
         </div>
-      </div>
-      <br/>
-      <br/>
+        <div class="col-md-6">
+          <br/>
+          <br/>
           <div id="loadingContainer">
             <p id="loadingText"></p>
             <div id="loadingSpinner"></div>

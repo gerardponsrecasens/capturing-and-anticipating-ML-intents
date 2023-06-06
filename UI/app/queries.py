@@ -282,7 +282,7 @@ def get_preprocessing(user,dataset,intent):
         constraint_task = row['constraintTaskCount']
     
     if found:
-        if int(constraint_task)/int(total_tasks)<0.5:
+        if int(constraint_task)/int(total_tasks)>0.5:
             preprocessing = True
         else:
             preprocessing = False
@@ -322,7 +322,7 @@ def get_preprocessing(user,dataset,intent):
             constraint_task = row['constraintTaskCount']
         
         if found:
-            if int(constraint_task)/int(total_tasks)<0.5:
+            if int(constraint_task)/int(total_tasks)>0.5:
                 preprocessing = True
             else:
                 preprocessing = False
@@ -337,7 +337,7 @@ def get_preprocessing(user,dataset,intent):
         WHERE {{
             ml:{user} ml:runs ?workflow.
             ?workflow ml:achieves ?task.
-            ?task ml:hasIntent ml:{intent}.
+            ?task ml:hasIntent ml:{intent}
             ?task ml:hasConstraint ml:ConstraintNoPreprocessing
         }}
         """
@@ -364,7 +364,7 @@ def get_preprocessing(user,dataset,intent):
             constraint_task = row['constraintTaskCount']
         
         if found:
-            if int(constraint_task)/int(total_tasks)<0.5:
+            if int(constraint_task)/int(total_tasks)>0.5:
                 preprocessing = True
             else:
                 preprocessing = False
@@ -377,7 +377,7 @@ def get_preprocessing(user,dataset,intent):
 
         SELECT (COUNT(DISTINCT ?task) AS ?constraintTaskCount)
         WHERE {{
-            ?task ml:hasIntent ml:{intent}.
+            ?task ml:hasIntent ml:{intent}
             ?task ml:hasConstraint ml:ConstraintNoPreprocessing
         }}
         """
@@ -402,7 +402,7 @@ def get_preprocessing(user,dataset,intent):
             constraint_task = row['constraintTaskCount']
         
         if found:
-            if int(constraint_task)/int(total_tasks)<0.5:
+            if int(constraint_task)/int(total_tasks)>0.5:
                 preprocessing = True
             else:
                 preprocessing = False

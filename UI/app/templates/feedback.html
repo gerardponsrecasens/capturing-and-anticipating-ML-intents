@@ -33,36 +33,27 @@
   }
 </style>
 
-<div style="text-align: center;">
-  <h1>RESULTS</h1>
-  <br/>
-  <p>Your {{ metric }} score is of <b>{{ data }}</b>.</p>
-  <br/>
-  <img src="{{ url_for('static', filename='images/confusion_matrix.png') }}" alt="Visualization">
-  <br/>
-  <br/>
-  <br/>
-  <br/>
-  <br/>
-  <img src="{{ url_for('static', filename='images/dataflow.png') }}" alt="Visualization">
-  <br/>
-  <br/>
-  <br/>
-  <form method="POST" style="display: inline-block; text-align: left;">
-      {{ form.csrf_token }}
-      {{ form.rating.label(class='form-label') }}
-      <div class="rating">
-          {% for choice in form.rating %}
-              <input type="radio" id="{{ choice.id }}" name="{{ form.rating.name }}" value="{{ choice.data }}" {% if choice.checked %} checked {% endif %}>
-              <label for="{{ choice.id }}" class="radio-inline">{{ choice.label }}</label>
-          {% endfor %}
-      </div>
-      <br/>
-      {{ form.feedback.label(class='form-label') }}
-      {{ form.feedback(class='form-control') }}
-      <br/>
-      {{ form.submit(class='btn btn-primary') }}
-  </form>
-</div>
+<h1>RESULTS</h1>
+<br/>
+Your {{metric}} score is of <b>{{data}}</b>. 
+<br/>
+<img src="{{ url_for('static', filename='images/confusion_matrix.png') }}" alt="Your Image">
+<br/>
+<br/>
+<form method="POST">
+    {{ form.csrf_token }}
+    {{form.rating.label(class='form-label')}}
+    <div class="rating">
+      {% for choice in form.rating %}
+          <input type="radio" id="{{ choice.id }}" name="{{ form.rating.name }}" value="{{ choice.data }}" {% if choice.checked %} checked {% endif %}>
+          <label for="{{ choice.id }}" class="radio-inline">{{ choice.label }}</label>
+      {% endfor %}
+  </div>
+    <br/>
+    {{form.feedback.label(class='form-label')}}
+    {{form.feedback(class='form-control')}}
+    <br/>
+    {{form.submit(class='btn btn-primary')}}
 
+  </form>
 {% endblock %}

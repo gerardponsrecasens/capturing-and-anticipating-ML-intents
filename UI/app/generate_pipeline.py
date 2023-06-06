@@ -11,8 +11,6 @@ import time
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from graphviz import Digraph
-
 
 '''
 Script used to automatically run HyperOpt constraint experiments for all the datasets
@@ -167,37 +165,6 @@ def pipeline_generator(user_input):
 
     # Save the plot to a file
     plt.savefig('./app/static/images/confusion_matrix.png')
-
-    # Generate workflow visualization and save it to a file:
-
-    # Create a new Digraph
-    graph = Digraph('DataFlow', filename='./app/static/images/dataflow')
-    graph.attr(rankdir='LR')  # Set rank direction to left-to-right
-
-    # Add nodes with customized colors
-
-    graph.node('Dataset', 'Dataset: \n'+user_input['Dataset'], fillcolor='orange', style='filled',shape='rectangle')
-    graph.node('Visualization', 'Visualization: \n Confusion Matrix', fillcolor='lightgreen', style='filled',shape='rectangle')
-    algo = results['pipeline']['learner']
-    algo_name = str(algo).split('(')[0]
-    graph.node('Algorithm', 'Algorithm: \n'+algo_name, fillcolor='lightblue', style='filled',shape='rectangle')
-   
-    if len(results['pipeline']['preprocs']) != 0:
-        prepro = results['pipeline']['preprocs'][0]
-        prepro_name = str(prepro).split('(')[0]
-        graph.node('Preprocessing', 'Preprocessing: \n'+prepro_name, fillcolor='lightblue', style='filled',shape='rectangle')
-
-        # Add edges with customized colors
-        graph.edge('Dataset', 'Preprocessing')
-        graph.edge('Preprocessing', 'Algorithm')
-        graph.edge('Algorithm','Visualization')
-    else:
-        graph.edge('Dataset', 'Algorithm')
-        graph.edge('Algorithm','Visualization')
-
-    # Render and save the graph
-    graph.format = 'png'
-    graph.render(view=False)
 
 
     return(np.round(estim.score(X_test, y_test),2))

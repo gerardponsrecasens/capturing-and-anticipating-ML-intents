@@ -6,6 +6,7 @@ from .generate_pipeline import pipeline_generator
 from .generate_triples import generate_user_dataset, generate_intent, generate_all
 from .recommend import recommendation
 from .queries import get_algorithm, get_intent, get_metric,get_preprocessing,get_preprocessing_algorithm
+from .exploration import get_result
 
 
 # Create Form Class for the User Input. They are structured so that the recommendation engine
@@ -15,8 +16,6 @@ class initialForm(FlaskForm):
     '''
     First intital form where the user can select the datasets that he/she wants to use.
     '''
-    my_anticipations = [('kge','Link Prediction'),('query','SPARQL')]
-    anticipation = SelectField('Anticipation Method',choices=my_anticipations,render_kw={'style': 'width: 30ch'})
     name = StringField('User Name',validators=[DataRequired()],render_kw={'style': 'width: 30ch'})
     my_datasets = [('iris', 'iris'), ('wines', 'wines'), ('boston', 'boston')]
     dataset = SelectField('What is your dataset?',choices=my_datasets,render_kw={'style': 'width: 30ch'})
@@ -26,11 +25,9 @@ class intentForm(FlaskForm):
     '''
     Second form where the user specifies the Intent
     '''
-    name = StringField('User Name',validators=[DataRequired()],render_kw={'style': 'width: 30ch',"readonly": True})
-    my_anticipations = [('kge','Link Prediction'),('query','SPARQL')]
-    anticipation = SelectField('Anticipation Method',choices=my_anticipations,render_kw={'style': 'width: 30ch',"readonly": True})
+    name = StringField('User Name',validators=[DataRequired()],render_kw={'style': 'width: 30ch'})
     my_datasets = [('iris', 'iris'), ('wines', 'wines'), ('boston', 'boston')]
-    dataset = SelectField('What is your dataset?',choices=my_datasets,render_kw={'style': 'width: 30ch',"readonly": True})
+    dataset = SelectField('What is your dataset?',choices=my_datasets,render_kw={'style': 'width: 30ch'})
     my_intents = [('Classification', 'Classification'), ('Regression', 'Regression'), ('Clustering', 'Clustering')]
     intent = SelectField('What is your intent?',choices=my_intents,render_kw={'style': 'width: 30ch'})
     submit = SubmitField('Proceed')
@@ -39,13 +36,11 @@ class inputForm(FlaskForm):
     '''
     Final form where the user specifies the evaluation requirements and constraints.
     '''
-    name = StringField('User Name',validators=[DataRequired()],render_kw={'style': 'width: 30ch',"readonly": True})
-    my_anticipations = [('kge','Link Prediction'),('query','SPARQL')]
-    anticipation = SelectField('Anticipation Method',choices=my_anticipations,render_kw={'style': 'width: 30ch',"readonly": True})
+    name = StringField('User Name',validators=[DataRequired()],render_kw={'style': 'width: 30ch'})
     my_datasets = [('iris', 'iris'), ('wines', 'wines'), ('boston', 'boston')]
-    dataset = SelectField('What is your dataset?',choices=my_datasets,render_kw={'style': 'width: 30ch',"readonly": True})
+    dataset = SelectField('What is your dataset?',choices=my_datasets,render_kw={'style': 'width: 30ch'})
     my_intents = [('Classification', 'Classification'), ('Regression', 'Regression'), ('Clustering', 'Clustering')]
-    intent = SelectField('What is your intent?',choices=my_intents,render_kw={'style': 'width: 30ch',"readonly": True})
+    intent = SelectField('What is your intent?',choices=my_intents,render_kw={'style': 'width: 30ch'})
     my_metrics = [('Accuracy', 'Accuracy'), ('Precision', 'Precision'), ('F1', 'F1'), ('AUC','AUC')]
     metric = SelectField('Metric to optimize?',choices = my_metrics,render_kw={'style': 'width: 30ch'})
     time = DecimalField('Time limit (in seconds)',validators=[DataRequired(),NumberRange(0,3600)],render_kw={'style': 'width: 30ch'})
@@ -68,6 +63,9 @@ class ratingForm(FlaskForm):
     feedback = TextAreaField('Leave any comments you may have')
     submit = SubmitField('Submit')
 
+class queryForm(FlaskForm):
+    sparql = TextAreaField('SPARQL Query') 
+    submit = SubmitField('Submit')
 
 
 views = Blueprint('views', __name__)
@@ -103,7 +101,7 @@ def home():
 
         # Once the dataset has been specified, the system variables are stored and the first triples are generated
 
-        session['Anticipation'] = form.anticipation.data
+        session['Anticipation'] = 'query'
         session['User'] = form.name.data
         session['Dataset'] = form.dataset.data
 
@@ -124,7 +122,6 @@ def intent():
     form = intentForm()
     form.name.data = session['User']
     form.dataset.data = session['Dataset']
-    form.anticipation.data = session['Anticipation']
 
     print(session['User'],session['Dataset'])
     
@@ -142,10 +139,12 @@ def intent():
     elif request.method == 'POST':
 
         session['Intent'] = form.intent.data
-        generate_intent(user = session['User'], dataset = session['Dataset'],
+        evalRequirement,algoConst = generate_intent(user = session['User'], dataset = session['Dataset'],
                         user_intent = session['Intent'], task = session['Task'],
                         current_time = session['current_time'])
         
+        session['evalRequirement'] = evalRequirement
+        session['algoConst'] = algoConst
 
         return redirect(url_for('views.eval_const'))
 
@@ -158,7 +157,6 @@ def eval_const():
     form.name.data = session['User']
     form.dataset.data = session['Dataset']
     form.intent.data = session['Intent']
-    form.anticipation.data = session['Anticipation']
 
     if request.method == 'GET':
 
@@ -173,7 +171,9 @@ def eval_const():
                                form = form)
 
         else:
-            algorithm_constraint, prepro_constraint, metric = recommendation(stage = 2, task = session['Task'])
+            algorithm_constraint, prepro_constraint, metric = recommendation(stage = 2, task = session['Task'], 
+                                                                    evalRequirement = session['evalRequirement'], 
+                                                                    algoConst = session['algoConst'])
             
                         
             form.algorithm.data = algorithm_constraint
@@ -194,11 +194,8 @@ def eval_const():
 
         data = {'User':form.name.data,'Intent':form.intent.data,'Dataset':form.dataset.data,'Time':float(form.time.data),
                 'Metric':form.metric.data,'Preprocessing':form.prepro.data,'Algorithm':form.algorithm.data,
-                'PreproAlgorithm':form.preprocessor.data, 
-                'Hyperparameter':form.hyperparam.data if form.hyperparam.data != 'None' else None,
-                'Hyperparameter_value': int(form.hyperparam_value.data) if form.hyperparam_value.data is not None else None}
-        
-        print(data)
+                'PreproAlgorithm':form.preprocessor.data, 'Hyperparameter':form.hyperparam.data,
+                'Hyperparameter_value': int(form.hyperparam_value.data)}
 
         session['metric'] = form.metric.data
         score = pipeline_generator(data)
@@ -225,7 +222,8 @@ def feedback_screen():
 
         generate_all(feedback=[feedback.rating.data,feedback.feedback.data],current_time = session['current_time'],
                       user = session['User'],dataset = session['Dataset'],
-                      workflow = session['Workflow'],task = session['Task'])
+                      workflow = session['Workflow'],task = session['Task'],
+                      evalRequirement = session['evalRequirement'],algoConst = session['algoConst'])
         
         #TO DO: incorporate COMMENT in feedback
 
@@ -233,4 +231,26 @@ def feedback_screen():
 
 
 
+
+'''
+Exloration View. Let the user pose some queries over the available KG. In the future,
+the results should be restricted to the user permissions.
+'''
+
+@views.route('/exploration', methods=['GET', 'POST'])
+
+def exploration():
+    query = queryForm()
+    if request.method == 'GET':
+        query.sparql.data = 'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \nPREFIX exp: <http://localhost/8080/intentOntology#> \n \n SELECT ?entity1 WHERE { \n ?entity1 exp:relation1 ?entity2 \n }'
+        return render_template("exploration.html",
+                               form = query)
+    
+    elif request.method == 'POST':
+
+        query_text = query.sparql.data
+        print(query_text)
+        results = get_result(query_text)
+
+        return render_template("results.html", results = results)
 

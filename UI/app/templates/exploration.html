@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Exploration{% endblock %}
+
+{% block content%}
+
+<div id="content-wrapper">
+    <h1>Exploration</h1>
+    <form method="POST" class="row">
+    {{form.sparql.label(class='form-label')}}
+    {{form.sparql(class='form-control',rows=10)}}
+    <br/>
+    <br/>
+    {{form.submit(class='btn btn-primary') }}
+    </form>
+</div>
+
+
+{% endblock %}
