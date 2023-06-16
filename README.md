@@ -16,7 +16,5 @@ To achieve it, different steps have been followed:
 
 
 
-The repository is organized as follows: in the *Ontology* folder, the ontology .nt files can be found, alongside with the scripts used to generate them. Then, in the ontology *Population* folder the scripts for creating the instances from the different sources can be found. Then, the *Recommender* folder contains the scripts used to experiment with the anticipation system. Finally, in the *UI* folder, the script to execute a prototype of the whole system can be found.
-
-[![image](https://github.com/gerardponsrecasens/capturing-and-anticipating-ML-intents/assets/95172600/d0dc248b-642f-4900-84c0-eac9a85c6e35)](https://youtu.be/MMHCoE6yonw)
+The repository is organized as follows: in the *Ontology* folder, the ontology .nt files can be found, alongside with the scripts used to generate them. Then, in the ontology *Population* folder the scripts for creating the instances from the different sources can be found. Then, the *Recommender* folder contains the scripts used to experiment with the anticipation system. Finally, in the *UI* folder, the script to execute a prototype of the whole system can be found. A video demo of the prototype can be found [here](https://youtu.be/MMHCoE6yonw).
 
