@@ -82,14 +82,6 @@ def pipeline_generator(user_input):
     output_path = r'./app/static/workflow/'
 
 
-    # Define Constraint Space (Classifiers (w/ hyperparameters) and Preprocessors), for choosing randomly
-
-    # different_classifiers = {'SVC':{'C':[0.01,0.1,1,10],'kernel':['linear','poly','rbf']},
-    #                         'RandomForestClassifier':{'n_estimators':[100,150,200],'max_depth':[2,3,4,5,6,7],'criterion':['gini','entropy']},
-    #                         'LogisticRegression':{'penalty':['l1','l2'],'C':[0.01,0.1,1,10]},
-    #                         'KNeighborsClassifier':{'n_neighbors':[3,5,7],'weights':['uniform','distance']},
-    #                         'Any':{}}
-
     different_preprocessors = {'NoPre':[],'StandardScaler':[standard_scaler('my_pre')],'MinMaxScaler':[min_max_scaler('my_pre')],
                                'Normalizer':[normalizer('my_pre')],'Any':any_preprocessing("my_pre")} 
 
@@ -119,14 +111,7 @@ def pipeline_generator(user_input):
         constraint_args[user_input['Hyperparameter']] = user_input['Hyperparameter_value']
 
 
-    # #If done randomly
-    # algorithm_args = different_classifiers[algorithm]
-    # for arg in algorithm_args:
-    #     if bool(random.getrandbits(1)):
-    #         l = len(algorithm_args[arg])
-    #         constraint_args[arg]= algorithm_args[arg][random.randint(0, l-1)]
-
-    
+   
     if user_input['Preprocessing']:
         preprocessor = user_input['PreproAlgorithm']
 

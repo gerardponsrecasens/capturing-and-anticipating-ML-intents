@@ -14,7 +14,7 @@ from .exploration import get_result
 
 class initialForm(FlaskForm):
     '''
-    First intital form where the user can select the datasets that he/she wants to use.
+    First intital form where the user can select the datasets that he/she wants to use and their desired anticipation engine
     '''
     my_anticipations = [('kge','Link Prediction'),('query','SPARQL')]
     anticipation = SelectField('Anticipation Method',choices=my_anticipations,render_kw={'style': 'width: 30ch'})
@@ -25,7 +25,7 @@ class initialForm(FlaskForm):
 
 class intentForm(FlaskForm):
     '''
-    Second form where the user specifies the Intent
+    Second form where the user specifies the Intent 
     '''
     name = StringField('User Name',validators=[DataRequired()],render_kw={'style': 'width: 30ch',"readonly": True})
     my_anticipations = [('kge','Link Prediction'),('query','SPARQL')]
@@ -70,6 +70,9 @@ class ratingForm(FlaskForm):
     submit = SubmitField('Submit')
 
 class queryForm(FlaskForm):
+    '''
+    Interface to pose different SPARQL queries
+    '''
     sparql = TextAreaField('SPARQL Query') 
     submit = SubmitField('Submit')
 
@@ -237,6 +240,9 @@ def feedback_screen():
 
 
 
+'''
+Tab to let the users explore the KG through SPARQL queries. A simple query template is given to them at the start.
+'''
 @views.route('/exploration', methods=['GET', 'POST'])
 
 def exploration():

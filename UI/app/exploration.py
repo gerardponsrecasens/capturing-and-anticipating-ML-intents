@@ -1,5 +1,9 @@
 from rdflib import Graph
 
+
+'''
+Script to apply the user defined query to the KG and return the results.
+'''
 def get_result(query):
 
     graph = Graph()

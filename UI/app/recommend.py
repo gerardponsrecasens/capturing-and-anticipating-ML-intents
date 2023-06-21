@@ -15,6 +15,10 @@ from tqdm.autonotebook import tqdm
 import matplotlib.pyplot as plt
 from collections import defaultdict
 
+'''
+Recommendation Engine for Link Prediction.
+'''
+
 def recommendation(stage, task,
                    n_epochs = 500, lr = 0.0001): #Stage can be 1 (recommend Intent) or 2 (recommend const)
 
@@ -123,9 +127,6 @@ def recommendation(stage, task,
 
     if stage == 1: # Recommend Intent
 
-        # TO DO: Update with the different Intents that can exist. For that, it is needed to run more experiments with 
-        # different intents, not only classification.
-
         head_idx = entity_name_to_idx[str(task)]
 
         relation_idx = relation_name_to_idx['http://localhost/8080/intentOntology#hasIntent']
@@ -192,3 +193,8 @@ def recommendation(stage, task,
 
         return algorithm_constraint, prepro_constraint ,metric
 
+
+'''
+TO DO: once more dataset are given to the user, the Intent must be filtered. Right now, the filter has been done manually, as only classification methods
+can be used.
+'''
