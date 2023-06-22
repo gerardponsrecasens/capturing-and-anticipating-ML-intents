@@ -1,4 +1,4 @@
-# USER INTERFACT
+# USER INTERFACE
 
 This folder contains the User Interface created for the Task 4.3 of the **ExtremeXP** project. Its purpose is to prototype the user experience and visualize the recommnendation/knowledge graph task, hence it is a simple version that should be completely changed to incorporate the different parts of the project created in other Tasks. The usage is as follows:
 
