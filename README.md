@@ -1,6 +1,6 @@
 # Capturing and anticipating user intents in complex analytics workflows
 
-This repository contains the main scripts for the **Capturing and Anticipating User Intents in Complex Analytics Workflows** for my *Master's Thesis*, which correspond the Task 4.3 of the **ExtremeXP** project, focusing on two key functionalities of the ExtremeXP framework: 
+This repository contains the main scripts for the work **On Enhancing AutoML Tools with Knowledge Graphs**, which correspond the Task 4.3 of the **ExtremeXP** project, focusing on two key functionalities of the ExtremeXP framework: 
 - Capturing of user intents, user preferences, and constraints in a newly designed Knowledge Graph.
 - Suggesting the end-users the different input parameters, enabling them to interact in a more efficient and intuitive manner with the system.
 
