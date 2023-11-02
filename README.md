@@ -12,8 +12,9 @@ To achieve it, different steps have been followed:
 
 
 
-![image](https://github.com/gerardponsrecasens/capturing-and-anticipating-ML-intents/assets/95172600/95dda1c3-cd15-4ff8-9afa-6354e2b50e16)
 
+
+![GeneralFlowIDA](https://github.com/gerardponsrecasens/capturing-and-anticipating-ML-intents/assets/95172600/c118b0e4-1122-4560-bae4-5428e7a121ef)
 
 
 The repository is organized as follows: in the *Knowledge Graph* folder, the ontology .nt files can be found, alongside with the scripts used to generate them. Then, in the ontology *Knowledge Graph* folder the scripts for creating the instances from the different sources can be found. Then, the *Recommender* folder contains the scripts used to experiment with the anticipation system. Finally, in the *UI* folder, the script to execute a prototype of the whole system can be found. A video demo of the prototype can be found [here](https://youtu.be/MMHCoE6yonw).
