@@ -1,4 +1,4 @@
-# LINK PRDICTION
+# LINK PREDICTION
 
 This folder contains main scripts for the **Link Prediction** experiments. The main library used is *PyKEEN*, which is has a wide range of embedding models already implemented. In the *experiments.py* file, the script to run the different experiments presented in the Paper can be found. The *hpo.py* file contains the script to generate the final Hyperparameter Tuning Optimization step.
 
